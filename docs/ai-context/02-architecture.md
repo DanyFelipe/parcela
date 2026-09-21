@@ -83,14 +83,15 @@
 ## 2. Contrato de `StorageProvider` (obligatorio)
 
 Todo acceso a archivos (videos de transición, renders fijos, imágenes 360°, planos técnicos) pasa por esta interfaz — nunca se llama directamente al SDK de un proveedor desde un componente, página o Server Action.
-
 **Nota de simplificación respecto a versiones anteriores de este documento:** al pasar de secuencias de frames a video real (sección 6), `StorageProvider` deja de ser una interfaz especializada en "frames numerados" y pasa a ser un **storage de assets genérico** — ya no existe el concepto de manifest de frames ni de frame individual.
+
+`uploadAsset` devuelve la URL canónica creada por el proveedor. `getAssetUrl` es asíncrono porque algunos proveedores necesitan consultar metadata para resolver la URL pública real; no se construyen URLs de storage a mano en consumidores. La implementación actual con Vercel Blob usa `put`, `head` y `del` del SDK oficial, manteniendo el token exclusivamente en el servidor.
 
 ```typescript
 // lib/storage/types.ts
 export interface StorageProvider {
-  getAssetUrl(clientId: string, assetPath: string): string;
-  uploadAsset(clientId: string, assetPath: string, file: Buffer): Promise<void>;
+  getAssetUrl(clientId: string, assetPath: string): Promise<string>;
+  uploadAsset(clientId: string, assetPath: string, file: Buffer): Promise<string>;
   deleteAsset(clientId: string, assetPath: string): Promise<void>;
 }
 ```
@@ -516,4 +517,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-09-16 · **Versión:** 3.1
+**Última actualización:** 2026-09-21 · **Versión:** 3.2
