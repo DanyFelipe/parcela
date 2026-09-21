@@ -226,12 +226,14 @@ El estado de la experiencia interactiva (vista actual, lote seleccionado, si hay
 // lib/store/showroom.store.ts
 import { create } from 'zustand';
 
+type ShowroomView = 'front' | 'rear' | 'top';
+
 interface ShowroomState {
-  currentView: string; // 'front' | 'rear' | 'top'
+  currentView: ShowroomView;
   selectedLotId: string | null;
   transitionInProgress: boolean;
-  setView: (id: string) => void;
-  selectLot: (id: string | null) => void;
+  setView: (view: ShowroomView) => void;
+  selectLot: (lotId: string | null) => void;
   setTransitionInProgress: (value: boolean) => void;
 }
 
@@ -239,8 +241,8 @@ export const useShowroomStore = create<ShowroomState>((set) => ({
   currentView: 'front',
   selectedLotId: null,
   transitionInProgress: false,
-  setView: (id) => set({ currentView: id }),
-  selectLot: (id) => set({ selectedLotId: id }),
+  setView: (currentView) => set({ currentView }),
+  selectLot: (selectedLotId) => set({ selectedLotId }),
   setTransitionInProgress: (value) => set({ transitionInProgress: value }),
 }));
 ```
