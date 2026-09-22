@@ -1,69 +1,69 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
 
-export default function Home() {
+import { createClient } from '@/lib/supabase/server';
+
+type ViewId = 'front' | 'rear' | 'top';
+
+interface View {
+  id: ViewId;
+  display_order: number;
+  base_image_url: string;
+  alt_image_url: string | null;
+}
+
+const viewAltText: Record<ViewId, string> = {
+  front: 'Vista frontal del terreno',
+  rear: 'Vista posterior del terreno',
+  top: 'Vista aérea del terreno con división de lotes',
+};
+
+async function getViews(): Promise<View[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('views')
+    .select('id, display_order, base_image_url, alt_image_url')
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    console.error('Error loading showroom views', { error });
+    throw new Error('No se pudieron cargar las vistas del terreno.');
+  }
+
+  return (data ?? []).filter((view): view is View => {
+    return view.id === 'front' || view.id === 'rear' || view.id === 'top';
+  });
+}
+
+export default async function Home() {
+  const views = await getViews();
+  const currentView = views.find((view) => view.id === 'front') ?? views[0];
+
+  if (!currentView) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-6 text-white">
+        <p role="status">No hay vistas disponibles para mostrar.</p>
+      </main>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
+      <img
+        src={currentView.base_image_url}
+        alt={viewAltText[currentView.id]}
+        className="absolute inset-0 h-full w-full object-cover"
+        data-testid="showroom-base-image"
+      />
+      <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
+      <section className="relative z-10 flex min-h-screen items-end p-6 sm:p-10">
+        <div className="max-w-md rounded-lg bg-black/55 p-5 backdrop-blur-sm">
+          <p className="text-sm uppercase tracking-[0.2em] text-white/70">Parcela</p>
+          <h1 className="mt-2 text-3xl font-semibold">Descubre tu próximo terreno</h1>
+          <p className="mt-2 text-white/80">
+            Explora las vistas del proyecto y conoce cada espacio.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
