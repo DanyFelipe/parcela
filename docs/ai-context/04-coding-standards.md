@@ -40,6 +40,14 @@ chore: actualizar dependencias de dev
 | Componentes | React Testing Library          | Componentes con lógica condicional relevante (ej. `Hotspot` según estado del lote)                                                   |
 | End-to-end  | Playwright                     | Flujo completo: carga vista general → rotación → click lote → transición → detalle → volver                                          |
 
+### 3.1. Convenciones de ejecución y ubicación
+
+- Los tests unitarios y de componentes viven en `tests/unit/` y usan los patrones `*.test.ts` o `*.test.tsx`.
+- `pnpm test` ejecuta Vitest y solo descubre tests dentro de `tests/unit/`.
+- Los tests E2E viven en `tests/e2e/` y se ejecutan por separado con `pnpm exec playwright test`.
+- Vitest no debe recoger archivos de Playwright: ambos runners tienen responsabilidades y APIs incompatibles.
+- Un test unitario debe verificar una unidad aislada y determinista; un test E2E debe verificar un flujo observable desde el navegador.
+
 **Regla:** un cambio que toque `TransitionVideoPlayer`, el `showroom.store.ts`, o cualquier Server Action de `admin/actions.ts` no se considera "terminado" sin al menos una prueba que lo respalde, salvo que el usuario explícitamente indique que es un prototipo descartable.
 
 ## 4. Manejo de errores
@@ -178,4 +186,4 @@ transitionPlayer.play(videoUrl);
 
 ---
 
-**Última actualización:** 2026-09-16 · **Versión:** 1.4
+**Última actualización:** 2026-09-21 · **Versión:** 1.5
