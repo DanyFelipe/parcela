@@ -87,6 +87,7 @@ export async function updateLot(lotId: string, changes: unknown) {
 ## 7. Checklist de calidad antes de dar por terminada una tarea
 
 - [ ] TypeScript estricto, sin `any` sin justificar con `// TODO`.
+- [ ] `pnpm exec tsc --noEmit` pasa sin errores (no hay script de typecheck dedicado).
 - [ ] Lint y formato pasan sin errores.
 - [ ] Naming consistente con la sección 1 de este documento.
 - [ ] Si toca flujo crítico, hay al menos un test que lo cubre.
@@ -186,4 +187,4 @@ transitionPlayer.play(videoUrl);
 
 ---
 
-**Última actualización:** 2026-09-21 · **Versión:** 1.5
+**Última actualización:** 2026-09-23 · **Versión:** 1.6

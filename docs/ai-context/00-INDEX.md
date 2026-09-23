@@ -8,13 +8,14 @@ Si una instrucción del usuario en el chat contradice algo escrito en estos docu
 
 ## Mapa de documentos
 
-| Documento                                            | Cuándo cargarlo                                                                                                            |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| [`01-stack-and-infra.md`](./01-stack-and-infra.md)   | Elegir una librería, tocar infraestructura, proveedores, variables de entorno, hosting, storage                            |
-| [`02-architecture.md`](./02-architecture.md)         | Crear archivos nuevos, entender dónde vive cada pieza, patrones (StorageProvider, Server Actions, estado), flujo de la app |
-| [`03-database.md`](./03-database.md)                 | Cualquier tarea que lea o escriba en Supabase: tablas, columnas, RLS, queries, migraciones                                 |
-| [`04-coding-standards.md`](./04-coding-standards.md) | Naming, testing, git/commits, formato, checklist de calidad, manejo de errores                                             |
-| [`05-design-system.md`](./05-design-system.md)       | Cualquier componente visual: colores, tipografía, spacing, animación, tono de marca                                        |
+| Documento                                            | Cuándo cargarlo                                                                                                                                                       |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`01-stack-and-infra.md`](./01-stack-and-infra.md)   | Elegir una librería, tocar infraestructura, proveedores, variables de entorno, hosting, storage                                                                       |
+| [`02-architecture.md`](./02-architecture.md)         | Crear archivos nuevos, entender dónde vive cada pieza, patrones (StorageProvider, Server Actions, estado), flujo de la app                                            |
+| [`03-database.md`](./03-database.md)                 | Cualquier tarea que lea o escriba en Supabase: tablas, columnas, RLS, queries, migraciones                                                                            |
+| [`04-coding-standards.md`](./04-coding-standards.md) | Naming, testing, git/commits, formato, checklist de calidad, manejo de errores                                                                                        |
+| [`05-design-system.md`](./05-design-system.md)       | Cualquier componente visual: colores, tipografía, spacing, animación, tono de marca                                                                                   |
+| [`DEVELOPMENT-PLAN.md`](./DEVELOPMENT-PLAN.md)       | Plan por sprints, tickets `PARC-XXX`, estimaciones, Definition of Done y estado de avance. Léelo para saber en qué punto está el proyecto y qué se construye en orden |
 
 **Tareas que cruzan dominios** (la mayoría de las tareas reales) requieren cargar más de un documento. Ejemplos:
 
@@ -38,4 +39,4 @@ Cualquier cambio a estos documentos que altere una decisión ya tomada (no una c
 
 ---
 
-**Última actualización:** 2026-09-16 · **Versión:** 1.0
+**Última actualización:** 2026-09-23 · **Versión:** 1.1

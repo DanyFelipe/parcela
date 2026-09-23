@@ -35,14 +35,28 @@ describe('VideoTransitionPlayer', () => {
     expect(onComplete).toHaveBeenCalledOnce();
   });
 
+  it('notifies error when the video element fires an error event', () => {
+    const player = new VideoTransitionPlayer(videoElement);
+    const onError = vi.fn();
+
+    player.onError(onError);
+    videoElement.dispatchEvent(new Event('error'));
+
+    expect(onError).toHaveBeenCalledOnce();
+  });
+
   it('stops notifying after disposal', () => {
     const player = new VideoTransitionPlayer(videoElement);
     const onComplete = vi.fn();
+    const onError = vi.fn();
 
     player.onComplete(onComplete);
+    player.onError(onError);
     player.dispose();
     videoElement.dispatchEvent(new Event('ended'));
+    videoElement.dispatchEvent(new Event('error'));
 
     expect(onComplete).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
   });
 });

@@ -4,6 +4,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import * as Sentry from '@sentry/nextjs';
+
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
 import { VideoTransitionPlayer } from '@/lib/transitions/video-transition-player';
 
@@ -37,7 +39,6 @@ export function TransitionVideoPlayer({
     setShowDestinationImage(false);
     setTransitionInProgress(true);
 
-    const player = new VideoTransitionPlayer(videoElement);
     const completeTransition = () => {
       if (completedRef.current) {
         return;
@@ -49,8 +50,30 @@ export function TransitionVideoPlayer({
       setShowDestinationImage(true);
     };
 
+    const handleVideoError = (source: string) => (error: unknown) => {
+      if (completedRef.current) {
+        return;
+      }
+
+      Sentry.captureMessage(`Video transition failed: ${source}`, {
+        level: 'warning',
+        extra: { videoUrl, destinationView, error },
+      });
+
+      completeTransition();
+    };
+
+    const player = new VideoTransitionPlayer(videoElement);
     player.onComplete(completeTransition);
-    void player.play(videoUrl).catch(completeTransition);
+    player.onError(handleVideoError('video-error'));
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      completeTransition();
+    } else {
+      void player.play(videoUrl).catch(handleVideoError('play-rejection'));
+    }
 
     return () => {
       player.dispose();
