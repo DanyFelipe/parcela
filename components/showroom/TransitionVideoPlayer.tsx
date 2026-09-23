@@ -1,7 +1,8 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
 import { VideoTransitionPlayer } from '@/lib/transitions/video-transition-player';
@@ -72,12 +73,10 @@ export function TransitionVideoPlayer({
         preload="auto"
         aria-hidden="true"
       />
-      <Image
-        className={`object-cover transition-opacity duration-200 ${
+      <img
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
           showDestinationImage ? 'opacity-100' : 'opacity-0'
         }`}
-        fill
-        unoptimized
         src={destinationImageUrl}
         alt={`Vista ${destinationView}`}
       />
