@@ -34,3 +34,58 @@ order by display_order;
 select count(*) as seeded_view_count
 from views
 where id in ('front', 'rear', 'top');
+
+-- PARC-107: Seed mínimo de clips de transición para desarrollo.
+-- Reemplazar estas URLs por los assets reales antes de un despliegue.
+-- La gráfica válida no incluye transiciones directas entre rear y top.
+
+insert into view_transitions (from_view_id, to_view_id, video_url)
+values
+  (
+    'front',
+    'rear',
+    'https://example.com/parcela/transitions/front-to-rear.mp4'
+  ),
+  (
+    'rear',
+    'front',
+    'https://example.com/parcela/transitions/rear-to-front.mp4'
+  ),
+  (
+    'front',
+    'top',
+    'https://example.com/parcela/transitions/front-to-top.mp4'
+  ),
+  (
+    'top',
+    'front',
+    'https://example.com/parcela/transitions/top-to-front.mp4'
+  )
+on conflict (from_view_id, to_view_id) do nothing;
+
+-- Verificación: debe devolver 4 y ningún resultado con rear/top en cualquier sentido.
+select from_view_id, to_view_id, video_url
+from view_transitions
+where (from_view_id, to_view_id) in (
+  ('front', 'rear'),
+  ('rear', 'front'),
+  ('front', 'top'),
+  ('top', 'front')
+)
+order by from_view_id, to_view_id;
+
+select count(*) as seeded_transition_count
+from view_transitions
+where (from_view_id, to_view_id) in (
+  ('front', 'rear'),
+  ('rear', 'front'),
+  ('front', 'top'),
+  ('top', 'front')
+);
+
+select count(*) as forbidden_transition_count
+from view_transitions
+where (from_view_id, to_view_id) in (
+  ('rear', 'top'),
+  ('top', 'rear')
+);
