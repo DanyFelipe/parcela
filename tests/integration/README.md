@@ -21,5 +21,7 @@ pnpm test:integration
 
 ## Skeleton
 
-Agregar aquí archivos `*.test.ts`. El primer smoke test formal es el ticket **PARC-111**
-(supabase con RLS activo + storage: subir → resolver URL → eliminar asset temporal).
+Los smoke tests formales del ticket **PARC-111** ya están aquí:
+`supabase.smoke.test.ts` (lectura pública, RLS activo, escritura con service_role +
+limpieza) y `vercel-blob.smoke.test.ts` (subir → resolver URL → HEAD → eliminar asset
+temporal). Agregar nuevos archivos `*.test.ts` siguiendo las convenciones anteriores.

@@ -75,7 +75,7 @@ export async function updateLot(lotId: string, changes: unknown) {
 ## 5. Accesibilidad (mínimo esperado)
 
 - Todo elemento interactivo (hotspot, botón de rotación, botón "volver") debe ser alcanzable por teclado (`tabIndex`, `onKeyDown` donde `onClick` no baste) y tener un `aria-label` descriptivo — un hotspot sobre un render no es auto-explicativo para un lector de pantalla sin él.
-- Contraste de texto sobre imágenes de render: mínimo AA de WCAG en cualquier texto superpuesto (precio, nombre de lote), lo cual casi siempre implica un scrim/overlay semitransparente detrás del texto — ver `05-design-system.md`.
+- Contraste de texto sobre imágenes de render: mínimo AA de WCAG en cualquier texto superpuesto (precio, nombre de lote), lo cual casi siempre implica un scrim/overlay semitransparente detrás del texto.
 - Respetar `prefers-reduced-motion`: si el usuario lo tiene activado, el cambio de vista debe poder saltar directamente a mostrar el `base_image_url` de la vista de destino en vez de forzar la reproducción completa del clip de transición.
 
 ## 6. Performance en código (no solo en assets)
@@ -187,4 +187,4 @@ transitionPlayer.play(videoUrl);
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.6
+**Última actualización:** 2026-09-23 · **Versión:** 1.7

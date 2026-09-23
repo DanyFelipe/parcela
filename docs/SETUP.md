@@ -38,15 +38,42 @@ NEXT_PUBLIC_CLIENT_SLUG=
 Verificar con el SQL Editor: existen `front`, `rear`, `top` y las 4 transiciones direccionales
 (sin `rear↔top`). Los seeds usan `ON CONFLICT DO NOTHING` — son idempotentes.
 
-## 4. Correr y verificar
+## 4. Correr el proyecto
 
 ```bash
 pnpm dev                 # http://localhost:3000
-pnpm lint
-pnpm test                # Vitest unitario (tests/unit)
-pnpm test:integration    # opt-in: requiere credenciales reales (tests/integration)
-pnpm exec playwright test  # E2E (lanza su propio `pnpm dev`)
 ```
 
 > Playwright reutiliza un server ya corriendo en `:3000`; sin E2E, el flujo se prueba en
 > `http://localhost:3000` manualmente (dashboard → rotar → vista `rear`).
+
+## 5. Comandos de testing (todos)
+
+| Comando                                         | Qué hace                                                            | Requisitos                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| `pnpm test`                                     | Tests unitarios y de componentes (Vitest) — solo `tests/unit/`      | Ninguno                                       |
+| `pnpm exec vitest run tests/unit/X.test.ts`     | Un solo test unitario (reemplazar `X`)                              | Ninguno                                       |
+| `pnpm exec vitest`                              | Vitest en modo watch (re-ejecuta al guardar)                        | Ninguno                                       |
+| `pnpm test:integration`                         | Smoke tests de integración — `tests/integration/` (Supabase + Blob) | `.env.local` con credenciales reales (opt-in) |
+| `pnpm exec playwright test`                     | Tests E2E — solo `tests/e2e/` (lanza su propio `pnpm dev`)          | `.env.local` con credenciales reales          |
+| `pnpm exec playwright test tests/e2e/X.spec.ts` | Un solo test E2E (reemplazar `X`)                                   | `.env.local` con credenciales reales          |
+| `pnpm exec playwright test --ui`                | Playwright en modo interactivo (elegir tests visualmente)           | `.env.local` con credenciales reales          |
+| `pnpm exec playwright show-report`              | Abrir el reporte HTML del último run E2E                            | Haber corrido E2E antes                       |
+
+**Reglas que no se deben mezclar:**
+
+- `pnpm test` (Vitest) **solo descubre `tests/unit/**`** — nunca recoge `tests/e2e/` ni `tests/integration/`.
+- Los tests de integración son **opt-in**: no corren con `pnpm test`, solo con `pnpm test:integration`.
+- Playwright y Vitest tienen ubicaciones y APIs incompatibles — no mover archivos entre carpetas.
+
+## 6. Quality gates antes de commitear
+
+```bash
+pnpm lint                        # ESLint
+pnpm exec tsc --noEmit           # typecheck (no hay script dedicado)
+pnpm exec prettier --check .     # formato (usa .prettierignore)
+pnpm exec prettier --write .     # formato con corrección automática
+```
+
+> Husky + lint-staged ejecutan `eslint --fix` y `prettier --write` automáticamente en el
+> pre-commit sobre los archivos stageados. **Nunca usar `--no-verify`.**
