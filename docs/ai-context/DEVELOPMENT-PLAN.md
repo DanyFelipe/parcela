@@ -13,7 +13,7 @@
   2. TypeScript estricto, sin `any` sin justificar.
   3. Sigue la estructura de carpetas de `02-architecture.md`, sección 1.
   4. Si toca flujo crítico (transición de video, store de Zustand, Server Actions), tiene al menos una prueba (Vitest o Playwright).
-  5. Commit en formato Conventional Commits, referenciando el ticket (`feat(PARC-104): ...`).
+  5. Commit en formato Conventional Commits, referenciando el ticket (`feat(PARC-104): ...`) — ejecutado **solo tras aprobación explícita del usuario** (ver `04-coding-standards.md`, sección 2.1).
   6. Pasa Husky/lint-staged sin errores.
 
 ### Estrategia única de verificación externa
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.4
+**Última actualización:** 2026-09-23 · **Versión:** 1.5

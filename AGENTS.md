@@ -41,6 +41,7 @@ pnpm exec tsc --noEmit                    # no hay script de typecheck dedicado
 - Alias `@/*` apunta a la **raíz del repo** (no existe `src/`).
 - Pre-commit (Husky + lint-staged): `eslint --fix` + `prettier --write` sobre lo stageado. Nunca sugerir `--no-verify`.
 - Commits: Conventional Commits con scope de ticket — `feat(PARC-109): ...` (ver `git log`).
+- **Nunca ejecutar `git commit`/`git push` sin aprobación previa del usuario.** Flujo: implementar → presentar resumen + diff → usuario revisa → usuario pide explícitamente el commit/push → ejecutar. Si tras aprobar hay cambios nuevos, se vuelve a presentar.
 - Prettier: comillas simples, `printWidth` 100.
 
 ## Reglas no negociables (detalle completo en docs/ai-context/)
