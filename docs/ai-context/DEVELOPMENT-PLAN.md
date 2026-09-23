@@ -53,19 +53,19 @@ Objetivo: entorno de desarrollo funcional, stack instalado, base de datos conect
 
 Objetivo: el usuario puede ver el terreno en `front` y rotar hacia `rear` con la animación de video real, sin hotspots todavía. Esta es la columna vertebral de todo lo demás.
 
-| Ticket   | Título                                                                                      | Prioridad | Estimación | Estado |
-| -------- | ------------------------------------------------------------------------------------------- | --------- | ---------- | ------ |
-| PARC-101 | Seed de datos de prueba: `views` (front/rear/top) con imágenes placeholder                  | 🔴        | 2          | Done   |
-| PARC-102 | Módulo `lib/storage`: interfaz `StorageProvider` + implementación Vercel Blob               | 🔴        | 5          | Done   |
-| PARC-103 | Store de Zustand (`showroom.store.ts`): `currentView`, `transitionInProgress`               | 🔴        | 2          | Done   |
-| PARC-104 | Componente `TransitionVideoPlayer` (reproduce clip, dispara `onComplete`)                   | 🔴        | 5          | Done   |
-| PARC-105 | `app/page.tsx`: Server Component que lee `views` y renderiza imagen fija en reposo          | 🔴        | 3          | Done   |
-| PARC-106 | `ViewControls`: botón de rotación `front↔rear` (sin reversa, ver `02-architecture.md` §7.4) | 🔴        | 3          | Done   |
-| PARC-107 | Seed de datos: `view_transitions` con clips de video placeholder                            | 🔴        | 1          | Done   |
-| PARC-108 | Test unitario: lógica de resolución de qué clip corresponde según vista actual/destino      | 🟡        | 2          | Done   |
-| PARC-109 | Test E2E: cargar showroom → click rotar → ver cambio de vista completo                      | 🟡        | 3          | Done   |
-| PARC-110 | Manejo de error: clip de video falla al cargar → fallback a `base_image_url` (04, §4)       | 🟢        | 2          | Done   |
-| PARC-111 | Smoke tests de integraciones locales: Supabase + Vercel Blob con credenciales reales        | 🔴        | 3          | Todo   |
+| Ticket   | Título                                                                                      | Prioridad | Estimación | Estado    |
+| -------- | ------------------------------------------------------------------------------------------- | --------- | ---------- | --------- |
+| PARC-101 | Seed de datos de prueba: `views` (front/rear/top) con imágenes placeholder                  | 🔴        | 2          | Done      |
+| PARC-102 | Módulo `lib/storage`: interfaz `StorageProvider` + implementación Vercel Blob               | 🔴        | 5          | Done      |
+| PARC-103 | Store de Zustand (`showroom.store.ts`): `currentView`, `transitionInProgress`               | 🔴        | 2          | Done      |
+| PARC-104 | Componente `TransitionVideoPlayer` (reproduce clip, dispara `onComplete`)                   | 🔴        | 5          | Done      |
+| PARC-105 | `app/page.tsx`: Server Component que lee `views` y renderiza imagen fija en reposo          | 🔴        | 3          | Done      |
+| PARC-106 | `ViewControls`: botón de rotación `front↔rear` (sin reversa, ver `02-architecture.md` §7.4) | 🔴        | 3          | Done      |
+| PARC-107 | Seed de datos: `view_transitions` con clips de video placeholder                            | 🔴        | 1          | Done      |
+| PARC-108 | Test unitario: lógica de resolución de qué clip corresponde según vista actual/destino      | 🟡        | 2          | Done      |
+| PARC-109 | Test E2E: cargar showroom → click rotar → ver cambio de vista completo                      | 🟡        | 3          | Done      |
+| PARC-110 | Manejo de error: clip de video falla al cargar → fallback a `base_image_url` (04, §4)       | 🟢        | 2          | Done      |
+| PARC-111 | Smoke tests de integraciones locales: Supabase + Vercel Blob con credenciales reales        | 🔴        | 3          | In Review |
 
 **Criterio de salida del sprint:** un usuario puede abrir `/`, ver el render `front`, hacer click en rotar, ver el video de transición reproducirse, y terminar en `rear` — y viceversa. Sin hotspots, sin vista `top` todavía.
 
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.2
+**Última actualización:** 2026-09-23 · **Versión:** 1.3
