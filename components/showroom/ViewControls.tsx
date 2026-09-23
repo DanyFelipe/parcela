@@ -4,6 +4,10 @@ import { ArrowUp, RotateCw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
+import {
+  resolveTransitionVideoUrl,
+  type TransitionUrls,
+} from '@/lib/transitions/transition-resolver';
 
 export interface ViewTransitionRequest {
   fromView: ShowroomView;
@@ -12,12 +16,8 @@ export interface ViewTransitionRequest {
 }
 
 interface ViewControlsProps {
-  transitionUrls: Partial<Record<string, string>>;
+  transitionUrls: TransitionUrls;
   onTransitionRequest: (request: ViewTransitionRequest) => void;
-}
-
-function getTransitionKey(fromView: ShowroomView, toView: ShowroomView): string {
-  return `${fromView}->${toView}`;
 }
 
 export function ViewControls({ transitionUrls, onTransitionRequest }: ViewControlsProps) {
@@ -32,7 +32,7 @@ export function ViewControls({ transitionUrls, onTransitionRequest }: ViewContro
       return;
     }
 
-    const videoUrl = transitionUrls[getTransitionKey(currentView, toView)];
+    const videoUrl = resolveTransitionVideoUrl(currentView, toView, transitionUrls);
 
     if (!videoUrl) {
       return;
