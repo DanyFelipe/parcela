@@ -3,14 +3,15 @@ import type { TransitionPlayer } from './types';
 export class VideoTransitionPlayer implements TransitionPlayer {
   private readonly videoElement: HTMLVideoElement;
   private completeCallback: (() => void) | null = null;
-  private errorCallback: (() => void) | null = null;
+  private errorCallback: ((error?: unknown) => void) | null = null;
 
   private readonly handleEnded = () => {
     this.completeCallback?.();
   };
 
-  private readonly handleError = () => {
-    this.errorCallback?.();
+  private readonly handleError = (event: Event) => {
+    const mediaError = (event.target as HTMLVideoElement | null)?.error;
+    this.errorCallback?.(mediaError ?? event);
   };
 
   constructor(videoElement: HTMLVideoElement) {
@@ -29,7 +30,7 @@ export class VideoTransitionPlayer implements TransitionPlayer {
     this.completeCallback = callback;
   }
 
-  onError(callback: () => void): void {
+  onError(callback: (error?: unknown) => void): void {
     this.errorCallback = callback;
   }
 
