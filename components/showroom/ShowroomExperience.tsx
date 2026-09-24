@@ -4,26 +4,33 @@
 
 import { useState } from 'react';
 
+import { Hotspot } from '@/components/showroom/Hotspot';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
+import type { LotData, LotHotspotData, ShowroomViewData } from '@/lib/showroom/showroom-data';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
 import type { TransitionUrls } from '@/lib/transitions/transition-resolver';
-
-import type { ShowroomViewData } from '@/lib/showroom/showroom-data';
 
 interface ShowroomExperienceProps {
   views: Pick<ShowroomViewData, 'id' | 'base_image_url'>[];
   transitionUrls: TransitionUrls;
   viewAltText: Record<ShowroomView, string>;
+  lots?: LotData[];
+  lotHotspots?: LotHotspotData[];
 }
+
+const VIEW_WITH_LOT_HOTSPOTS: ShowroomView = 'top';
 
 export function ShowroomExperience({
   views,
   transitionUrls,
   viewAltText,
+  lots = [],
+  lotHotspots = [],
 }: ShowroomExperienceProps) {
   const currentView = useShowroomStore((state) => state.currentView);
   const transitionInProgress = useShowroomStore((state) => state.transitionInProgress);
+  const selectLot = useShowroomStore((state) => state.selectLot);
   const [pendingTransition, setPendingTransition] = useState<ViewTransitionRequest | null>(null);
   const currentViewData = views.find((view) => view.id === currentView) ?? views[0];
 
@@ -35,11 +42,23 @@ export function ShowroomExperience({
     setPendingTransition(request);
   }
 
+  function handleHotspotClick(lotId: string): void {
+    selectLot(lotId);
+  }
+
   const destinationView = pendingTransition?.toView ?? currentView;
   const destinationViewData = views.find((view) => view.id === destinationView) ?? currentViewData;
   const showTransition =
     pendingTransition !== null &&
     (transitionInProgress || currentView !== pendingTransition.toView);
+
+  const showLotHotspots =
+    currentView === VIEW_WITH_LOT_HOTSPOTS && !transitionInProgress && !showTransition;
+
+  const lotById = new Map(lots.map((lot) => [lot.id, lot]));
+  const visibleHotspots = showLotHotspots
+    ? lotHotspots.filter((hotspot) => hotspot.view_id === VIEW_WITH_LOT_HOTSPOTS)
+    : [];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
@@ -50,12 +69,24 @@ export function ShowroomExperience({
           destinationImageUrl={destinationViewData.base_image_url}
         />
       ) : (
-        <img
-          src={currentViewData.base_image_url}
-          alt={viewAltText[currentViewData.id]}
-          className="absolute inset-0 h-full w-full object-cover"
-          data-testid="showroom-base-image"
-        />
+        <div className="absolute inset-0">
+          <img
+            src={currentViewData.base_image_url}
+            alt={viewAltText[currentViewData.id]}
+            className="h-full w-full object-cover"
+            data-testid="showroom-base-image"
+          />
+          {visibleHotspots.map((hotspot) => {
+            const lot = lotById.get(hotspot.lot_id);
+            if (!lot) {
+              return null;
+            }
+
+            return (
+              <Hotspot key={hotspot.id} lot={lot} hotspot={hotspot} onClick={handleHotspotClick} />
+            );
+          })}
+        </div>
       )}
       <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
       <section className="relative z-10 flex min-h-screen flex-col items-start justify-end gap-6 p-6 sm:p-10">
