@@ -151,10 +151,10 @@ create policy "Authenticated users can manage feature_hotspots" on feature_hotsp
 -- configurada: RLS decide QUÉ filas puede ver/tocar un rol, GRANT decide SI
 -- ese rol puede acceder a la tabla en absoluto. Ambos son necesarios juntos.
 grant select on lots, views, view_transitions, lot_hotspots, feature_hotspots
-  to anon, authenticated;
+  to anon, authenticated, service_role;
 
 grant insert, update, delete on lots, views, view_transitions, lot_hotspots, feature_hotspots
-  to authenticated;
+  to authenticated, service_role;
 
 -- =============================================================================
 -- 7. ÍNDICES

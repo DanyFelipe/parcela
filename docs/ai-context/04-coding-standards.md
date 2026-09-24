@@ -7,6 +7,7 @@
 1. Todo código nuevo se escribe en **TypeScript estricto**. `any` solo se acepta temporalmente con comentario `// TODO: tipar` y debe resolverse antes de mergear a la rama principal.
 2. Ningún commit se hace sin pasar lint, formato y tests relevantes — esto lo hacen cumplir Husky + lint-staged automáticamente, pero un agente de IA no debe sugerir `--no-verify` para saltarse el hook salvo emergencia explícitamente autorizada por el usuario.
 3. Si una tarea afecta el flujo crítico (rotación, transición a lote, vuelta), debe acompañarse de al menos una prueba (unitaria o E2E) que lo cubra.
+4. Un agente de IA **nunca ejecuta `git commit` ni `git push` de forma autónoma** — el usuario revisa y aprueba cada lote de cambios antes de que se commitee (flujo completo en la sección 2).
 
 ---
 
@@ -31,6 +32,17 @@ chore: actualizar dependencias de dev
 ```
 
 **Regla:** un agente de IA que genere commits debe usar este formato. El cuerpo del commit (si aplica) explica el _por qué_, no repite el _qué_ ya dicho en el título.
+
+### 2.1. Flujo de aprobación de commits (obligatorio para agentes de IA)
+
+**El usuario revisa y aprueba cada commit antes de que exista.** El agente no decide por su cuenta cuándo commitear:
+
+1. El agente implementa los cambios y ejecuta los quality gates (sección 7).
+2. El agente presenta al usuario un resumen claro de lo cambiado (archivos, propósito) y deja el diff disponible para revisión — sin ejecutar `git commit`.
+3. El usuario revisa por su cuenta el código nuevo/lo cambiado y, si está de acuerdo, pide explícitamente: "haz el commit" (y, cuando corresponda, "haz el push").
+4. Solo tras esa orden, el agente ejecuta `git commit` / `git push` con el mensaje acordado.
+
+**Si después de la aprobación el agente realiza cambios adicionales, el lote vuelve al paso 2** — la aprobación cubre lo que el usuario vio, no lo que cambió después. Excepción: el hook pre-commit de Husky puede modificar archivos al formatearlos dentro del commit aprobado; eso no requiere reaprobación.
 
 ## 3. Testing
 
@@ -75,7 +87,7 @@ export async function updateLot(lotId: string, changes: unknown) {
 ## 5. Accesibilidad (mínimo esperado)
 
 - Todo elemento interactivo (hotspot, botón de rotación, botón "volver") debe ser alcanzable por teclado (`tabIndex`, `onKeyDown` donde `onClick` no baste) y tener un `aria-label` descriptivo — un hotspot sobre un render no es auto-explicativo para un lector de pantalla sin él.
-- Contraste de texto sobre imágenes de render: mínimo AA de WCAG en cualquier texto superpuesto (precio, nombre de lote), lo cual casi siempre implica un scrim/overlay semitransparente detrás del texto — ver `05-design-system.md`.
+- Contraste de texto sobre imágenes de render: mínimo AA de WCAG en cualquier texto superpuesto (precio, nombre de lote), lo cual casi siempre implica un scrim/overlay semitransparente detrás del texto.
 - Respetar `prefers-reduced-motion`: si el usuario lo tiene activado, el cambio de vista debe poder saltar directamente a mostrar el `base_image_url` de la vista de destino en vez de forzar la reproducción completa del clip de transición.
 
 ## 6. Performance en código (no solo en assets)
@@ -93,7 +105,7 @@ export async function updateLot(lotId: string, changes: unknown) {
 - [ ] Si toca flujo crítico, hay al menos un test que lo cubre.
 - [ ] Errores manejados de forma segura (no se filtran errores crudos de Supabase a la UI).
 - [ ] Accesibilidad mínima respetada en elementos interactivos nuevos.
-- [ ] Commit sigue el formato de Conventional Commits.
+- [ ] El commit solo se ejecutó tras aprobación explícita del usuario (sección 2.1) y sigue el formato de Conventional Commits.
 - [ ] Si hubo ambigüedad sobre una convención, se preguntó al usuario en vez de asumir.
 - [ ] Ninguno de los anti-patrones de la sección 8 está presente en el código nuevo.
 
@@ -187,4 +199,4 @@ transitionPlayer.play(videoUrl);
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.6
+**Última actualización:** 2026-09-23 · **Versión:** 1.8

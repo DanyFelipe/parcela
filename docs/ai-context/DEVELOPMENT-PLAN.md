@@ -13,7 +13,7 @@
   2. TypeScript estricto, sin `any` sin justificar.
   3. Sigue la estructura de carpetas de `02-architecture.md`, sección 1.
   4. Si toca flujo crítico (transición de video, store de Zustand, Server Actions), tiene al menos una prueba (Vitest o Playwright).
-  5. Commit en formato Conventional Commits, referenciando el ticket (`feat(PARC-104): ...`).
+  5. Commit en formato Conventional Commits, referenciando el ticket (`feat(PARC-104): ...`) — ejecutado **solo tras aprobación explícita del usuario** (ver `04-coding-standards.md`, sección 2.1).
   6. Pasa Husky/lint-staged sin errores.
 
 ### Estrategia única de verificación externa
@@ -53,19 +53,19 @@ Objetivo: entorno de desarrollo funcional, stack instalado, base de datos conect
 
 Objetivo: el usuario puede ver el terreno en `front` y rotar hacia `rear` con la animación de video real, sin hotspots todavía. Esta es la columna vertebral de todo lo demás.
 
-| Ticket   | Título                                                                                      | Prioridad | Estimación | Estado |
-| -------- | ------------------------------------------------------------------------------------------- | --------- | ---------- | ------ |
-| PARC-101 | Seed de datos de prueba: `views` (front/rear/top) con imágenes placeholder                  | 🔴        | 2          | Done   |
-| PARC-102 | Módulo `lib/storage`: interfaz `StorageProvider` + implementación Vercel Blob               | 🔴        | 5          | Done   |
-| PARC-103 | Store de Zustand (`showroom.store.ts`): `currentView`, `transitionInProgress`               | 🔴        | 2          | Done   |
-| PARC-104 | Componente `TransitionVideoPlayer` (reproduce clip, dispara `onComplete`)                   | 🔴        | 5          | Done   |
-| PARC-105 | `app/page.tsx`: Server Component que lee `views` y renderiza imagen fija en reposo          | 🔴        | 3          | Done   |
-| PARC-106 | `ViewControls`: botón de rotación `front↔rear` (sin reversa, ver `02-architecture.md` §7.4) | 🔴        | 3          | Done   |
-| PARC-107 | Seed de datos: `view_transitions` con clips de video placeholder                            | 🔴        | 1          | Done   |
-| PARC-108 | Test unitario: lógica de resolución de qué clip corresponde según vista actual/destino      | 🟡        | 2          | Done   |
-| PARC-109 | Test E2E: cargar showroom → click rotar → ver cambio de vista completo                      | 🟡        | 3          | Done   |
-| PARC-110 | Manejo de error: clip de video falla al cargar → fallback a `base_image_url` (04, §4)       | 🟢        | 2          | Done   |
-| PARC-111 | Smoke tests de integraciones locales: Supabase + Vercel Blob con credenciales reales        | 🔴        | 3          | Todo   |
+| Ticket   | Título                                                                                      | Prioridad | Estimación | Estado    |
+| -------- | ------------------------------------------------------------------------------------------- | --------- | ---------- | --------- |
+| PARC-101 | Seed de datos de prueba: `views` (front/rear/top) con imágenes placeholder                  | 🔴        | 2          | Done      |
+| PARC-102 | Módulo `lib/storage`: interfaz `StorageProvider` + implementación Vercel Blob               | 🔴        | 5          | Done      |
+| PARC-103 | Store de Zustand (`showroom.store.ts`): `currentView`, `transitionInProgress`               | 🔴        | 2          | Done      |
+| PARC-104 | Componente `TransitionVideoPlayer` (reproduce clip, dispara `onComplete`)                   | 🔴        | 5          | Done      |
+| PARC-105 | `app/page.tsx`: Server Component que lee `views` y renderiza imagen fija en reposo          | 🔴        | 3          | Done      |
+| PARC-106 | `ViewControls`: botón de rotación `front↔rear` (sin reversa, ver `02-architecture.md` §7.4) | 🔴        | 3          | Done      |
+| PARC-107 | Seed de datos: `view_transitions` con clips de video placeholder                            | 🔴        | 1          | Done      |
+| PARC-108 | Test unitario: lógica de resolución de qué clip corresponde según vista actual/destino      | 🟡        | 2          | Done      |
+| PARC-109 | Test E2E: cargar showroom → click rotar → ver cambio de vista completo                      | 🟡        | 3          | Done      |
+| PARC-110 | Manejo de error: clip de video falla al cargar → fallback a `base_image_url` (04, §4)       | 🟢        | 2          | Done      |
+| PARC-111 | Smoke tests de integraciones locales: Supabase + Vercel Blob con credenciales reales        | 🔴        | 3          | In Review |
 
 **Criterio de salida del sprint:** un usuario puede abrir `/`, ver el render `front`, hacer click en rotar, ver el video de transición reproducirse, y terminar en `rear` — y viceversa. Sin hotspots, sin vista `top` todavía.
 
@@ -132,20 +132,20 @@ Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya ide
 
 ---
 
-## Sprint 5 — Diseño visual real (aplicar Design System) + Responsive
+## Sprint 5 — Diseño visual real (shadcn/ui + skill `frontend-design`) + Responsive
 
-Objetivo: reemplazar cualquier estilo genérico/placeholder por la identidad visual definida en `05-design-system.md`, y aplicar la estrategia responsive específica del proyecto.
+Objetivo: reemplazar cualquier estilo genérico/placeholder por la dirección de diseño del proyecto (`shadcn/ui` estándar + skill `frontend-design`, ver `00-INDEX.md`), y aplicar la estrategia responsive específica del proyecto.
 
-| Ticket   | Título                                                                                 | Prioridad | Estimación |
-| -------- | -------------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-501 | Tokens de color/tipografía/spacing en `tailwind.config`/`globals.css` según 05         | 🔴        | 3          |
-| PARC-502 | Estilo "vidrio esmerilado" en paneles flotantes (preview, popover, ficha)              | 🟡        | 3          |
-| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)          | 🔴        | 5          |
-| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11) | 🔴        | 5          |
-| PARC-505 | Verificación de contraste AA en texto sobre imagen                                     | 🟢        | 2          |
-| PARC-506 | Auditoría Lighthouse (Performance > 85 desktop / > 70 mobile, ver 01 §7)               | 🟡        | 3          |
+| Ticket   | Título                                                                                        | Prioridad | Estimación |
+| -------- | --------------------------------------------------------------------------------------------- | --------- | ---------- |
+| PARC-501 | Tokens de color/tipografía/spacing en `tailwind.config`/`globals.css` según shadcn/ui + skill | 🔴        | 3          |
+| PARC-502 | Estilo "vidrio esmerilado" en paneles flotantes (preview, popover, ficha)                     | 🟡        | 3          |
+| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)                 | 🔴        | 5          |
+| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11)        | 🔴        | 5          |
+| PARC-505 | Verificación de contraste AA en texto sobre imagen                                            | 🟢        | 2          |
+| PARC-506 | Auditoría Lighthouse (Performance > 85 desktop / > 70 mobile, ver 01 §7)                      | 🟡        | 3          |
 
-**Criterio de salida del sprint:** el showroom se ve y se siente como el producto final definido en el design system, en desktop y mobile.
+**Criterio de salida del sprint:** el showroom se ve y se siente como el producto final diseñado con shadcn/ui + la skill `frontend-design`, en desktop y mobile.
 
 ---
 
@@ -173,14 +173,14 @@ Objetivo: dejar el proyecto listo para mostrarse a un cliente real (piloto) en p
 
 Estos ítems están **intencionalmente pospuestos**. No deben iniciarse por iniciativa propia (de un desarrollador o un agente de IA) sin que el usuario lo solicite explícitamente — ver `02-architecture.md`, sección 0.
 
-| Ticket   | Título                                             | Por qué está en backlog                                            |
-| -------- | -------------------------------------------------- | ------------------------------------------------------------------ |
-| PARC-B01 | CRUD autenticado en `/admin` para `lots`           | Fase actual: carga manual por SQL (decisión de producto ya tomada) |
-| PARC-B02 | Herramienta "click para fijar hotspot" en `/admin` | Mencionada como mejora futura, sin definir aún                     |
-| PARC-B03 | Agrupación de hotspots por manzana/sector          | Solo si se detecta saturación real en un cliente con muchos lotes  |
-| PARC-B04 | Migración de storage a Cloudflare R2               | Solo si el costo de egress de Vercel Blob se vuelve significativo  |
-| PARC-B05 | Selector de tema claro/oscuro                      | Decisión de producto ya tomada: tema fijo único (05, sección 2)    |
-| PARC-B06 | Internacionalización (i18n) multi-idioma           | No solicitado; evaluar si un cliente lo requiere                   |
+| Ticket   | Título                                             | Por qué está en backlog                                             |
+| -------- | -------------------------------------------------- | ------------------------------------------------------------------- |
+| PARC-B01 | CRUD autenticado en `/admin` para `lots`           | Fase actual: carga manual por SQL (decisión de producto ya tomada)  |
+| PARC-B02 | Herramienta "click para fijar hotspot" en `/admin` | Mencionada como mejora futura, sin definir aún                      |
+| PARC-B03 | Agrupación de hotspots por manzana/sector          | Solo si se detecta saturación real en un cliente con muchos lotes   |
+| PARC-B04 | Migración de storage a Cloudflare R2               | Solo si el costo de egress de Vercel Blob se vuelve significativo   |
+| PARC-B05 | Selector de tema claro/oscuro                      | Decisión de producto ya tomada: tema fijo único (ver `00-INDEX.md`) |
+| PARC-B06 | Internacionalización (i18n) multi-idioma           | No solicitado; evaluar si un cliente lo requiere                    |
 
 ---
 
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.2
+**Última actualización:** 2026-09-23 · **Versión:** 1.5

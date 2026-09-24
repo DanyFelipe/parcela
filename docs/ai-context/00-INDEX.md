@@ -6,6 +6,8 @@
 
 Si una instrucción del usuario en el chat contradice algo escrito en estos documentos, **el agente debe señalar el conflicto explícitamente y pedir confirmación antes de proceder**, no resolverlo por su cuenta asumiendo que el mensaje más reciente tiene prioridad automática. Estos documentos representan decisiones ya deliberadas; un mensaje suelto en una conversación puede ser una idea a mitad de pensar.
 
+**Excepción (decisión adoptada explícitamente por el usuario):** cuando la instrucción en el chat **es** una modificación deliberada de uno de estos documentos pedida por el propio usuario (ej. "borra el 05", "agrega esta regla"), se aplica directamente — el conflicto no existe, el chat _es_ la aprobación. Se aplica el proceso de versionado de la sección correspondiente.
+
 ## Mapa de documentos
 
 | Documento                                            | Cuándo cargarlo                                                                                                                                                       |
@@ -14,13 +16,23 @@ Si una instrucción del usuario en el chat contradice algo escrito en estos docu
 | [`02-architecture.md`](./02-architecture.md)         | Crear archivos nuevos, entender dónde vive cada pieza, patrones (StorageProvider, Server Actions, estado), flujo de la app                                            |
 | [`03-database.md`](./03-database.md)                 | Cualquier tarea que lea o escriba en Supabase: tablas, columnas, RLS, queries, migraciones                                                                            |
 | [`04-coding-standards.md`](./04-coding-standards.md) | Naming, testing, git/commits, formato, checklist de calidad, manejo de errores                                                                                        |
-| [`05-design-system.md`](./05-design-system.md)       | Cualquier componente visual: colores, tipografía, spacing, animación, tono de marca                                                                                   |
 | [`DEVELOPMENT-PLAN.md`](./DEVELOPMENT-PLAN.md)       | Plan por sprints, tickets `PARC-XXX`, estimaciones, Definition of Done y estado de avance. Léelo para saber en qué punto está el proyecto y qué se construye en orden |
+
+## Dirección de diseño visual (reemplaza al antiguo `05-design-system.md`)
+
+**No existe un documento de design system propio.** Toda tarea de diseño visual — crear o modificar un componente, elegir colores, tipografía, spacing, animación de UI — se resuelve con **solo estas 2 fuentes**:
+
+1. **`shadcn/ui` estándar** (`01-stack-and-infra.md`, sección 1): la base de componentes (`components/ui/`, Radix + Tailwind). Los componentes generados no se editan a mano (`02-architecture.md`, sección 1) y sus tokens/variantes son el punto de partida de cualquier estilo.
+2. **Skill `frontend-design`** (`.agents/skills/frontend-design/SKILL.md`): dirección estética, composición y decisiones de diseño cuando se crea UI nueva o se resculpe una existente. Se carga junto con `02-architecture.md` cuando la tarea sea visual.
+
+**Regla:** si una tarea de UI no se resuelve con shadcn/ui + la skill, es una ambigüedad — **preguntar antes de asumir**, no inventar un sistema de estilos paralelo.
+
+**Decisión de producto que se conserva** (antes vivía en `05-design-system.md`, sección 2): el tema visual es **fijo** — un solo tema, sin modo oscuro ni selector de tema. Ver también `AGENTS.md`, reglas no negociables.
 
 **Tareas que cruzan dominios** (la mayoría de las tareas reales) requieren cargar más de un documento. Ejemplos:
 
 - _"Agrega el campo `fecha_reserva` al lote y muéstralo en el panel admin"_ → `03-database.md` + `02-architecture.md` + `04-coding-standards.md`
-- _"Cambia el hover de las tarjetas de lote"_ → `05-design-system.md` + `02-architecture.md`
+- _"Cambia el hover de las tarjetas de lote"_ → skill `frontend-design` + `02-architecture.md`
 - _"Migra el storage de este cliente a Cloudflare R2"_ → `01-stack-and-infra.md` + `02-architecture.md`
 
 Si tienes duda de qué documentos aplican, **carga de más, no de menos** — es preferible contexto extra a una implementación que ignora una convención ya definida.
@@ -39,4 +51,4 @@ Cualquier cambio a estos documentos que altere una decisión ya tomada (no una c
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.1
+**Última actualización:** 2026-09-23 · **Versión:** 1.3
