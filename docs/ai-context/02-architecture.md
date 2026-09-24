@@ -388,6 +388,41 @@ El grid/delimitación visual de cada lote en la vista top se genera en **Photosh
 
 **Regla para el agente de IA:** nunca implementar el trazado de polígonos de lotes con SVG/Canvas como reemplazo del grid de Photoshop.
 
+### 7.3.1. Sistema de coordenadas de hotspots y workflow futuro del admin
+
+El esquema almacena `hotspot_x` y `hotspot_y` como **porcentajes enteros del ancho y alto del render** (`0` a `100`), no como píxeles absolutos. Esta decisión resuelve dos problemas a la vez: la independencia de la resolución final del render y la estrategia responsive del proyecto.
+
+**¿Por qué porcentajes y no píxeles?**
+
+- El render de `top` puede exportarse a distintas resoluciones según el cliente o el dispositivo de entrega (por ejemplo, 1920×1080 para web rápida, 3840×2160 para pantallas 4K, o un ancho mayor si el terreno es panorámico). Mientras el **aspect ratio** se mantenga constante, un punto `(x=50, y=50)` siempre cae en el centro visual, sea cual sea la cantidad de píxeles.
+- En mobile no se reescala el render para "hacerlo caber"; se desplaza horizontalmente dentro de un viewport (ver sección 11). Los porcentajes siguen siendo válidos porque el render y sus hotspots conservan sus dimensiones naturales: el hotspot se posiciona como `%` del ancho/alto real de la imagen, no del viewport.
+
+**Resolución canónica recomendada (decisión de producción, no de código)**
+
+La plantilla no impone una resolución única en píxeles, pero sí exige que todos los renders de un mismo proyecto compartan el **mismo aspect ratio y la misma composición de encuadre**. Se recomienda acordar por proyecto una resolución canónica (ej. 1920×1080 o 2560×1440) y exportar todas las vistas y sus variantes (`alt_image_url`) desde el mismo Photoshop maestro. El código no necesita saber la resolución; solo necesita que la imagen se muestre sin estiramiento.
+
+> **Consecuencia práctica:** si un render se reemplaza por una versión de mayor resolución pero mismo encuadre, los hotspots no requieren recalibración.
+
+**Workflow futuro en `/admin` (no construir ahora, solo diseñar para que encaje)**
+
+Cuando en una fase posterior se construya el CRUD de hotspots, la interfaz deberá:
+
+1. Mostrar el render de `top` a su tamaño natural o escalado proporcionalmente dentro del editor (nunca estirado).
+2. Permitir hacer click sobre el render; el sistema convierte la posición del click a porcentaje usando la fórmula:
+   ```
+   hotspot_x = round((click_x / render_width) * 100)
+   hotspot_y = round((click_y / render_height) * 100)
+   ```
+3. Previsualizar el hotspot inmediatamente sobre la imagen mientras se edita.
+4. Validar que `hotspot_x` y `hotspot_y` estén entre `0` y `100` antes de guardar.
+5. Garantizar unicidad por `(lot_id, view_id)` para evitar que un mismo lote tenga dos marcadores en la misma vista.
+
+**Reglas de implementación para el admin futuro:**
+
+- No almacenar píxeles ni referencias a la resolución del render en la base de datos; la fuente de verdad son los porcentajes.
+- Si el render se muestra escalado en el editor, el cálculo debe usar las dimensiones reales del elemento imagen en pantalla, no las dimensiones del contenedor padre.
+- La variante `alt_image_url` de `top` debe tener el mismo encuadre y aspect ratio que `base_image_url`; por eso los hotspots no se ven afectados por el toggle de grid (sección 7.5).
+
 ### 7.4. Controles de navegación entre vistas (sin reversa, sin scrubbing)
 
 Como cada transición siempre avanza hacia adelante y nunca hace falta "deshacer" una animación, la UI de navegación se simplifica a dos controles independientes:
@@ -519,4 +554,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-09-21 · **Versión:** 3.2
+**Última actualización:** 2026-09-24 · **Versión:** 3.3
