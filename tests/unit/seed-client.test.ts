@@ -68,4 +68,37 @@ describe('client seed', () => {
     expect(seed).toContain('seeded_lot_count');
     expect(seed).toContain('lot_count');
   });
+
+  it('defines lot hotspots only on the top view with percentages in range', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+    const insertBlock = seed.match(
+      /insert into lot_hotspots[\s\S]*?on conflict \(lot_id, view_id\)/
+    )?.[0];
+
+    expect(insertBlock).toBeDefined();
+    expect(seed).toContain('insert into lot_hotspots');
+    expect(seed).toContain('on conflict (lot_id, view_id) do nothing');
+
+    const hotspotRows =
+      insertBlock?.match(
+        /\(\s*'[0-9a-f-]+'::uuid,\s*'[0-9a-f-]+'::uuid,\s*'top',\s*\d+,\s*\d+\s*\)/g
+      ) ?? [];
+    expect(hotspotRows.length).toBeGreaterThanOrEqual(5);
+    expect(hotspotRows.length).toBeLessThanOrEqual(8);
+
+    const coordinates = insertBlock?.match(/'top',\s*(\d+),\s*(\d+)/g) ?? [];
+    for (const coordinate of coordinates) {
+      const [, x, y] = coordinate.match(/'top',\s*(\d+),\s*(\d+)/) ?? [];
+      expect(Number(x)).toBeGreaterThanOrEqual(0);
+      expect(Number(x)).toBeLessThanOrEqual(100);
+      expect(Number(y)).toBeGreaterThanOrEqual(0);
+      expect(Number(y)).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it('includes lot hotspot verification queries', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+
+    expect(seed).toContain('seeded_lot_hotspot_count');
+  });
 });

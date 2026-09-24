@@ -248,3 +248,71 @@ where id in (
 )
 group by status
 order by status;
+
+-- PARC-203: Seed de posiciones de hotspots de lotes en la vista top.
+-- Las coordenadas son porcentajes (0-100) relativos al render de la vista top.
+-- Ver docs/ai-context/02-architecture.md sección 7.3 para el sistema de coordenadas.
+
+insert into lot_hotspots (
+  id,
+  lot_id,
+  view_id,
+  hotspot_x,
+  hotspot_y
+)
+values
+  (
+    'b70f040f-7a51-4d39-89d9-e544961dd4be'::uuid,
+    'd9b0fe21-c5b1-4b4d-acae-e4986597b4c7'::uuid,
+    'top',
+    25,
+    25
+  ),
+  (
+    '8499ae6e-2939-4bc7-b560-ea3db8645030'::uuid,
+    '02cf3efd-7c5f-4a7b-a41c-3e0e71e920f8'::uuid,
+    'top',
+    50,
+    25
+  ),
+  (
+    '9be59b6c-2405-46b8-aa8c-c3bb1bd77abf'::uuid,
+    'c714c229-cff7-416e-bd99-6acdf6a2df61'::uuid,
+    'top',
+    75,
+    25
+  ),
+  (
+    '4236c4d5-753b-4a22-8e34-722351460a79'::uuid,
+    '0f21566e-12d9-4709-af2e-5952bbbc5173'::uuid,
+    'top',
+    25,
+    65
+  ),
+  (
+    '8d48dffb-6371-4241-95ed-32e4398c8155'::uuid,
+    '2a2ea9b0-a33e-4b73-9723-781278a205f1'::uuid,
+    'top',
+    50,
+    65
+  ),
+  (
+    '529fa467-50bd-4643-9ba3-e946ce7f6dfc'::uuid,
+    '1b55d5f4-f553-4d5d-8d40-847e55dc1c17'::uuid,
+    'top',
+    75,
+    65
+  )
+on conflict (lot_id, view_id) do nothing;
+
+-- Verificación: debe devolver 6 hotspots en la vista top.
+select count(*) as seeded_lot_hotspot_count
+from lot_hotspots
+where view_id = 'top';
+
+-- Verificación: lista de lotes con sus coordenadas en top.
+select l.name, lh.hotspot_x, lh.hotspot_y
+from lot_hotspots lh
+  join lots l on l.id = lh.lot_id
+where lh.view_id = 'top'
+order by lh.hotspot_y, lh.hotspot_x;
