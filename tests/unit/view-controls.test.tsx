@@ -93,6 +93,35 @@ describe('ViewControls', () => {
     });
   });
 
+  it('requires returning to front before entering top from rear', () => {
+    useShowroomStore.setState({ currentView: 'rear' });
+    render(
+      <ViewControls
+        transitionUrls={{
+          'rear->front': 'https://example.com/rear-to-front.mp4',
+          'rear->top': 'https://example.com/rear-to-top.mp4',
+        }}
+        onTransitionRequest={onTransitionRequest}
+      />
+    );
+
+    const topControl = screen.getByRole('button', { name: 'Ver vista aérea' });
+    expect((topControl as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(topControl);
+
+    expect(onTransitionRequest).not.toHaveBeenCalledWith(
+      expect.objectContaining({ toView: 'top' })
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotar entre vista frontal y posterior' }));
+
+    expect(onTransitionRequest).toHaveBeenCalledWith({
+      fromView: 'rear',
+      toView: 'front',
+      videoUrl: 'https://example.com/rear-to-front.mp4',
+    });
+  });
+
   it('disables controls while a transition is in progress', () => {
     useShowroomStore.setState({ transitionInProgress: true });
     render(
