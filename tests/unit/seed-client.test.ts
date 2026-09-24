@@ -44,4 +44,28 @@ describe('client seed', () => {
     expect(seed).toContain('seeded_transition_count');
     expect(seed).toContain('forbidden_transition_count');
   });
+
+  it('defines 5-8 test lots with fixed ids and conflict handling', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+    const insertBlock = seed.match(/insert into lots[\s\S]*?on conflict \(id\)/)?.[0];
+
+    expect(insertBlock).toBeDefined();
+    expect(seed).toContain('insert into lots');
+    expect(seed).toContain('on conflict (id) do nothing');
+
+    const lotMatches = insertBlock?.match(/'Lote A-\d{2}'/g) ?? [];
+    expect(lotMatches.length).toBeGreaterThanOrEqual(5);
+    expect(lotMatches.length).toBeLessThanOrEqual(8);
+
+    expect(insertBlock).toContain("'available'");
+    expect(insertBlock).toContain("'reserved'");
+    expect(insertBlock).toContain("'sold'");
+  });
+
+  it('includes lot verification queries', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+
+    expect(seed).toContain('seeded_lot_count');
+    expect(seed).toContain('lot_count');
+  });
 });
