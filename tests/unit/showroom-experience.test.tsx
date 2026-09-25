@@ -45,6 +45,8 @@ describe('ShowroomExperience hotspot rendering', () => {
       selectedLotId: null,
       transitionInProgress: false,
     });
+    HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+    HTMLMediaElement.prototype.load = vi.fn();
   });
 
   afterEach(() => {
@@ -62,11 +64,11 @@ describe('ShowroomExperience hotspot rendering', () => {
       />
     );
 
-    expect(screen.queryByTestId('lot-hotspot')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lot-hotspots-layer')).not.toBeInTheDocument();
   });
 
   it('renders lot hotspots only in the top view', () => {
-    useShowroomStore.setState({ currentView: 'top' });
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
 
     render(
       <ShowroomExperience
@@ -78,10 +80,41 @@ describe('ShowroomExperience hotspot rendering', () => {
       />
     );
 
-    expect(screen.getByTestId('lot-hotspot')).toBeInTheDocument();
+    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
   });
 
-  it('hides lot hotspots while a transition is in progress', () => {
+  it('fades out hotspots when a transition starts from top', () => {
+    useShowroomStore.setState({ currentView: 'top' });
+
+    const { rerender } = render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'top->front': 'https://example.com/top-to-front.mp4' }}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-100');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a vista frontal' }));
+
+    rerender(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'top->front': 'https://example.com/top-to-front.mp4' }}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-0');
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('keeps hotspots mounted (faded out) during a top transition', () => {
     useShowroomStore.setState({ currentView: 'top', transitionInProgress: true });
 
     render(
@@ -94,11 +127,71 @@ describe('ShowroomExperience hotspot rendering', () => {
       />
     );
 
-    expect(screen.queryByTestId('lot-hotspot')).not.toBeInTheDocument();
+    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-0');
+  });
+
+  it('mounts hotspots faded out when starting a transition to top', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'front->top': 'https://example.com/front-to-top.mp4' }}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver vista aérea' }));
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-0');
+  });
+
+  it('fades in hotspots after arriving at top', async () => {
+    useShowroomStore.setState({ currentView: 'top' });
+
+    const { rerender } = render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    useShowroomStore.setState({ transitionInProgress: true });
+    rerender(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-0');
+
+    useShowroomStore.setState({ transitionInProgress: false });
+    rerender(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('lot-hotspots-layer')).toHaveClass('opacity-100');
+    });
   });
 
   it('selects a lot when its hotspot is clicked', async () => {
-    useShowroomStore.setState({ currentView: 'top' });
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
 
     render(
       <ShowroomExperience
@@ -110,7 +203,7 @@ describe('ShowroomExperience hotspot rendering', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Lote A-01' }));
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
 
     await waitFor(() => {
       expect(useShowroomStore.getState().selectedLotId).toBe('lot-1');
