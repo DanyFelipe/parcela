@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 
-import { Hotspot } from '@/components/showroom/Hotspot';
+import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
 import type { LotData, LotHotspotData, ShowroomViewData } from '@/lib/showroom/showroom-data';
@@ -52,42 +52,40 @@ export function ShowroomExperience({
     pendingTransition !== null &&
     (transitionInProgress || currentView !== pendingTransition.toView);
 
-  const showLotHotspots =
-    currentView === VIEW_WITH_LOT_HOTSPOTS && !transitionInProgress && !showTransition;
+  const showHotspotsLayer =
+    currentView === VIEW_WITH_LOT_HOTSPOTS || destinationView === VIEW_WITH_LOT_HOTSPOTS;
+  const hotspotsFadingOut = transitionInProgress;
 
-  const lotById = new Map(lots.map((lot) => [lot.id, lot]));
-  const visibleHotspots = showLotHotspots
-    ? lotHotspots.filter((hotspot) => hotspot.view_id === VIEW_WITH_LOT_HOTSPOTS)
-    : [];
+  const topHotspots = lotHotspots.filter((hotspot) => hotspot.view_id === VIEW_WITH_LOT_HOTSPOTS);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
-      {showTransition ? (
+      <div className="absolute inset-0">
+        <img
+          src={currentViewData.base_image_url}
+          alt={viewAltText[currentViewData.id]}
+          className="h-full w-full object-cover"
+          data-testid="showroom-base-image"
+        />
+      </div>
+
+      {showHotspotsLayer && (
+        <LotHotspotsLayer
+          lots={lots}
+          lotHotspots={topHotspots}
+          fadingOut={hotspotsFadingOut}
+          onHotspotClick={handleHotspotClick}
+        />
+      )}
+
+      {showTransition && (
         <TransitionVideoPlayer
           videoUrl={pendingTransition.videoUrl}
           destinationView={pendingTransition.toView}
           destinationImageUrl={destinationViewData.base_image_url}
         />
-      ) : (
-        <div className="absolute inset-0">
-          <img
-            src={currentViewData.base_image_url}
-            alt={viewAltText[currentViewData.id]}
-            className="h-full w-full object-cover"
-            data-testid="showroom-base-image"
-          />
-          {visibleHotspots.map((hotspot) => {
-            const lot = lotById.get(hotspot.lot_id);
-            if (!lot) {
-              return null;
-            }
-
-            return (
-              <Hotspot key={hotspot.id} lot={lot} hotspot={hotspot} onClick={handleHotspotClick} />
-            );
-          })}
-        </div>
       )}
+
       <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
       <section className="relative z-10 flex min-h-screen flex-col items-start justify-end gap-6 p-6 sm:p-10">
         <div className="max-w-md rounded-lg bg-black/55 p-5 backdrop-blur-sm">

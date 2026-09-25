@@ -82,8 +82,8 @@ Objetivo: navegación hacia `top`, hotspots de lote funcionando ahí, y los `fea
 | PARC-201 | Seed: transición `front↔top` + datos de prueba de 5-8 lotes en `lots`                                                                                                                                                                | 🔴        | 2          | Done        |
 | PARC-202 | Control de UI dedicado para entrar/salir de `top` (distinto del ciclo front/rear)                                                                                                                                                    | 🔴        | 2          | Done        |
 | PARC-203 | Seed: `lot_hotspots` (posiciones % de cada lote en `top`)                                                                                                                                                                            | 🔴        | 2          | Done        |
-| PARC-204 | Componente `Hotspot` + renderizado condicional (solo visible en `top`, ver 02 §7.1)                                                                                                                                                  | 🔴        | 3          | In Progress |
-| PARC-205 | Patrón fade-out/fade-in de hotspots al iniciar/terminar transición                                                                                                                                                                   | 🟡        | 2          |
+| PARC-204 | Componente `Hotspot` + renderizado condicional (solo visible en `top`, ver 02 §7.1)                                                                                                                                                  | 🔴        | 3          | Done        |
+| PARC-205 | Patrón fade-out/fade-in de hotspots al iniciar/terminar transición                                                                                                                                                                   | 🟡        | 2          | In Progress |
 | PARC-206 | Seed: `feature_hotspots` en `front` (mínimo: `lots_overview`, `sales_office`)                                                                                                                                                        | 🟡        | 1          |
 | PARC-207 | Componente `FeatureHotspot` + despacho `navigate_to_view` vs `show_info`                                                                                                                                                             | 🔴        | 5          |
 | PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          |
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-24 · **Versión:** 1.6
+**Última actualización:** 2026-09-25 · **Versión:** 1.7
