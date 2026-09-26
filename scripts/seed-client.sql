@@ -316,3 +316,71 @@ from lot_hotspots lh
   join lots l on l.id = lh.lot_id
 where lh.view_id = 'top'
 order by lh.hotspot_y, lh.hotspot_x;
+
+-- PARC-206: Seed de hotspots especiales en la vista front.
+-- Estos marcadores representan puntos de interés del terreno, no lotes individuales.
+-- Ver docs/ai-context/02-architecture.md sección 7.2 para los tipos y acciones permitidas.
+
+insert into feature_hotspots (
+  id,
+  view_id,
+  type,
+  action,
+  target_view_id,
+  title,
+  description,
+  icon,
+  hotspot_x,
+  hotspot_y
+)
+values
+  (
+    'd2519ea0-6e12-449d-9588-eb3cff4a9691'::uuid,
+    'front',
+    'lots_overview',
+    'navigate_to_view',
+    'top',
+    'Ver lotes',
+    'Accede a la vista aérea para explorar cada lote disponible.',
+    'layout-grid',
+    65,
+    45
+  ),
+  (
+    '9a336394-4f5b-4e2d-9cab-514a85074083'::uuid,
+    'front',
+    'sales_office',
+    'show_info',
+    null,
+    'Caseta de ventas',
+    'Atención personalizada de lunes a sábado de 9:00 a 18:00 hs.',
+    'home',
+    25,
+    55
+  ),
+  (
+    '43a75730-f24c-4c44-a9f6-34d933f8fa17'::uuid,
+    'front',
+    'main_access',
+    'show_info',
+    null,
+    'Acceso principal',
+    'Ingreso principal al proyecto con portón y seguridad.',
+    'map-pin',
+    50,
+    75
+  )
+on conflict (id) do nothing;
+
+-- Verificación: debe devolver al menos lots_overview y sales_office en front.
+select type, action, target_view_id, title, hotspot_x, hotspot_y
+from feature_hotspots
+where view_id = 'front'
+order by type;
+
+-- Verificación: conteo por acción.
+select action, count(*) as feature_count
+from feature_hotspots
+where view_id = 'front'
+group by action
+order by action;

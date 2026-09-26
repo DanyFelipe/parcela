@@ -101,4 +101,37 @@ describe('client seed', () => {
 
     expect(seed).toContain('seeded_lot_hotspot_count');
   });
+
+  it('defines feature hotspots on front with required types and actions', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+    const insertBlock = seed.match(/insert into feature_hotspots[\s\S]*?on conflict \(id\)/)?.[0];
+
+    expect(insertBlock).toBeDefined();
+    expect(seed).toContain('insert into feature_hotspots');
+    expect(seed).toContain('on conflict (id) do nothing');
+
+    expect(insertBlock).toContain("'front'");
+    expect(insertBlock).toContain("'lots_overview'");
+    expect(insertBlock).toContain("'sales_office'");
+    expect(insertBlock).toContain("'navigate_to_view'");
+    expect(insertBlock).toContain("'show_info'");
+    expect(insertBlock).toContain("'top'");
+
+    const coordinates = insertBlock?.match(/'front',[\s\S]*?(\d+),\s*(\d+)\s*\)/g) ?? [];
+    expect(coordinates.length).toBeGreaterThanOrEqual(2);
+
+    for (const coordinate of coordinates) {
+      const [, x, y] = coordinate.match(/(\d+),\s*(\d+)\s*\)/) ?? [];
+      expect(Number(x)).toBeGreaterThanOrEqual(0);
+      expect(Number(x)).toBeLessThanOrEqual(100);
+      expect(Number(y)).toBeGreaterThanOrEqual(0);
+      expect(Number(y)).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it('includes feature hotspot verification queries', async () => {
+    const seed = await readFile(resolve(process.cwd(), 'scripts/seed-client.sql'), 'utf8');
+
+    expect(seed).toContain('feature_count');
+  });
 });
