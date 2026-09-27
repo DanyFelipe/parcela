@@ -11,7 +11,7 @@ const viewAltText: Record<ViewId, string> = {
 };
 
 export default async function Home() {
-  const { views, transitionUrls, lots, lotHotspots } = await getShowroomData();
+  const { views, transitionUrls, lots, lotHotspots, featureHotspots } = await getShowroomData();
 
   if (views.length === 0) {
     return (
@@ -28,6 +28,7 @@ export default async function Home() {
       viewAltText={viewAltText}
       lots={lots}
       lotHotspots={lotHotspots}
+      featureHotspots={featureHotspots}
     />
   );
 }

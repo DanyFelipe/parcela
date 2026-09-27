@@ -1,6 +1,7 @@
 'use client';
 
 import { Hotspot } from '@/components/showroom/Hotspot';
+import { HotspotsLayer } from '@/components/showroom/HotspotsLayer';
 import type { LotData, LotHotspotData } from '@/lib/showroom/showroom-data';
 
 interface LotHotspotsLayerProps {
@@ -19,13 +20,7 @@ export function LotHotspotsLayer({
   const lotById = new Map(lots.map((lot) => [lot.id, lot]));
 
   return (
-    <div
-      className={`absolute inset-0 transition-opacity duration-200 ${
-        fadingOut ? 'opacity-0' : 'opacity-100'
-      }`}
-      aria-hidden={fadingOut}
-      data-testid="lot-hotspots-layer"
-    >
+    <HotspotsLayer fadingOut={fadingOut} testId="lot-hotspots-layer">
       {lotHotspots.map((hotspot) => {
         const lot = lotById.get(hotspot.lot_id);
         if (!lot) {
@@ -34,6 +29,6 @@ export function LotHotspotsLayer({
 
         return <Hotspot key={hotspot.id} lot={lot} hotspot={hotspot} onClick={onHotspotClick} />;
       })}
-    </div>
+    </HotspotsLayer>
   );
 }

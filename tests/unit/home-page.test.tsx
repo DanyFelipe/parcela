@@ -37,11 +37,25 @@ interface LotHotspotRow {
   hotspot_y: number;
 }
 
+interface FeatureHotspotRow {
+  id: string;
+  view_id: string;
+  type: string;
+  action: string;
+  target_view_id: string | null;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  hotspot_x: number;
+  hotspot_y: number;
+}
+
 function createSupabaseClient(responses: {
   views?: { data: ViewRow[]; error: null };
   view_transitions?: { data: TransitionRow[]; error: null };
   lots?: { data: LotRow[]; error: null };
   lot_hotspots?: { data: LotHotspotRow[]; error: null };
+  feature_hotspots?: { data: FeatureHotspotRow[]; error: null };
 }) {
   return {
     from: (table: string) => ({
@@ -65,7 +79,7 @@ describe('showroom data loader', () => {
     vi.clearAllMocks();
   });
 
-  it('loads views, transitions, lots and hotspots from Supabase', async () => {
+  it('loads views, transitions, lots, lot hotspots and feature hotspots from Supabase', async () => {
     const views: ViewRow[] = [
       {
         id: 'front',
@@ -93,6 +107,20 @@ describe('showroom data loader', () => {
     const lotHotspots: LotHotspotRow[] = [
       { id: 'hs-1', lot_id: 'lot-1', view_id: 'top', hotspot_x: 50, hotspot_y: 50 },
     ];
+    const featureHotspots: FeatureHotspotRow[] = [
+      {
+        id: 'fs-1',
+        view_id: 'front',
+        type: 'lots_overview',
+        action: 'navigate_to_view',
+        target_view_id: 'top',
+        title: 'Ver lotes',
+        description: null,
+        icon: 'layout-grid',
+        hotspot_x: 60,
+        hotspot_y: 40,
+      },
+    ];
 
     supabaseMocks.createClient.mockResolvedValue(
       createSupabaseClient({
@@ -100,6 +128,7 @@ describe('showroom data loader', () => {
         view_transitions: { data: transitions, error: null },
         lots: { data: lots, error: null },
         lot_hotspots: { data: lotHotspots, error: null },
+        feature_hotspots: { data: featureHotspots, error: null },
       })
     );
 
@@ -113,6 +142,7 @@ describe('showroom data loader', () => {
       { id: 'lot-1', name: 'Lote A-01', price: 100000, status: 'available', surface_area: 500 },
     ]);
     expect(result.lotHotspots).toEqual(lotHotspots);
+    expect(result.featureHotspots).toEqual(featureHotspots);
   });
 
   it('returns empty collections when Supabase returns no data', async () => {
@@ -123,6 +153,7 @@ describe('showroom data loader', () => {
     expect(result.views).toEqual([]);
     expect(result.lots).toEqual([]);
     expect(result.lotHotspots).toEqual([]);
+    expect(result.featureHotspots).toEqual([]);
   });
 
   it('throws a safe error when Supabase fails', async () => {
@@ -186,5 +217,58 @@ describe('showroom data loader', () => {
 
     expect(result.lotHotspots).toHaveLength(1);
     expect(result.lotHotspots[0].id).toBe('hs-1');
+  });
+
+  it('filters out feature hotspots with invalid type or action', async () => {
+    supabaseMocks.createClient.mockResolvedValue(
+      createSupabaseClient({
+        feature_hotspots: {
+          data: [
+            {
+              id: 'fs-1',
+              view_id: 'front',
+              type: 'lots_overview',
+              action: 'navigate_to_view',
+              target_view_id: 'top',
+              title: 'Ver lotes',
+              description: null,
+              icon: 'layout-grid',
+              hotspot_x: 60,
+              hotspot_y: 40,
+            },
+            {
+              id: 'fs-2',
+              view_id: 'front',
+              type: 'invalid_type',
+              action: 'show_info',
+              target_view_id: null,
+              title: 'Bad type',
+              description: null,
+              icon: null,
+              hotspot_x: 10,
+              hotspot_y: 10,
+            },
+            {
+              id: 'fs-3',
+              view_id: 'front',
+              type: 'sales_office',
+              action: 'invalid_action',
+              target_view_id: null,
+              title: 'Bad action',
+              description: null,
+              icon: null,
+              hotspot_x: 20,
+              hotspot_y: 20,
+            },
+          ],
+          error: null,
+        },
+      })
+    );
+
+    const result = await getShowroomData();
+
+    expect(result.featureHotspots).toHaveLength(1);
+    expect(result.featureHotspots[0].id).toBe('fs-1');
   });
 });

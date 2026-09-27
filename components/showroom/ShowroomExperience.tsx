@@ -4,11 +4,22 @@
 
 import { useState } from 'react';
 
+import { FeatureHotspotsLayer } from '@/components/showroom/FeatureHotspotsLayer';
+import {
+  FeatureInfoPopover,
+  type FeatureHotspotInfo,
+} from '@/components/showroom/FeatureInfoPopover';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
-import type { LotData, LotHotspotData, ShowroomViewData } from '@/lib/showroom/showroom-data';
+import type {
+  FeatureHotspotData,
+  LotData,
+  LotHotspotData,
+  ShowroomViewData,
+} from '@/lib/showroom/showroom-data';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
+import { resolveTransitionVideoUrl } from '@/lib/transitions/transition-resolver';
 import type { TransitionUrls } from '@/lib/transitions/transition-resolver';
 
 interface ShowroomExperienceProps {
@@ -17,9 +28,11 @@ interface ShowroomExperienceProps {
   viewAltText: Record<ShowroomView, string>;
   lots?: LotData[];
   lotHotspots?: LotHotspotData[];
+  featureHotspots?: FeatureHotspotData[];
 }
 
 const VIEW_WITH_LOT_HOTSPOTS: ShowroomView = 'top';
+const VIEW_WITH_FEATURE_HOTSPOTS: ShowroomView = 'front';
 
 export function ShowroomExperience({
   views,
@@ -27,11 +40,13 @@ export function ShowroomExperience({
   viewAltText,
   lots = [],
   lotHotspots = [],
+  featureHotspots = [],
 }: ShowroomExperienceProps) {
   const currentView = useShowroomStore((state) => state.currentView);
   const transitionInProgress = useShowroomStore((state) => state.transitionInProgress);
   const selectLot = useShowroomStore((state) => state.selectLot);
   const [pendingTransition, setPendingTransition] = useState<ViewTransitionRequest | null>(null);
+  const [activeFeatureInfo, setActiveFeatureInfo] = useState<FeatureHotspotInfo | null>(null);
   const currentViewData = views.find((view) => view.id === currentView) ?? views[0];
 
   if (!currentViewData) {
@@ -46,17 +61,49 @@ export function ShowroomExperience({
     selectLot(lotId);
   }
 
+  function handleFeatureNavigate(targetViewId: ShowroomView): void {
+    const videoUrl = resolveTransitionVideoUrl(currentView, targetViewId, transitionUrls);
+
+    if (!videoUrl) {
+      return;
+    }
+
+    setPendingTransition({
+      fromView: currentView,
+      toView: targetViewId,
+      videoUrl,
+    });
+  }
+
+  function handleFeatureShowInfo(feature: FeatureHotspotData): void {
+    setActiveFeatureInfo({
+      id: feature.id,
+      title: feature.title,
+      description: feature.description,
+      icon: feature.icon,
+    });
+  }
+
+  function handleCloseFeatureInfo(): void {
+    setActiveFeatureInfo(null);
+  }
+
   const destinationView = pendingTransition?.toView ?? currentView;
   const destinationViewData = views.find((view) => view.id === destinationView) ?? currentViewData;
   const showTransition =
     pendingTransition !== null &&
     (transitionInProgress || currentView !== pendingTransition.toView);
 
-  const showHotspotsLayer =
+  const showLotHotspotsLayer =
     currentView === VIEW_WITH_LOT_HOTSPOTS || destinationView === VIEW_WITH_LOT_HOTSPOTS;
+  const showFeatureHotspotsLayer =
+    currentView === VIEW_WITH_FEATURE_HOTSPOTS || destinationView === VIEW_WITH_FEATURE_HOTSPOTS;
   const hotspotsFadingOut = transitionInProgress;
 
   const topHotspots = lotHotspots.filter((hotspot) => hotspot.view_id === VIEW_WITH_LOT_HOTSPOTS);
+  const frontFeatureHotspots = featureHotspots.filter(
+    (hotspot) => hotspot.view_id === VIEW_WITH_FEATURE_HOTSPOTS
+  );
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
@@ -69,12 +116,21 @@ export function ShowroomExperience({
         />
       </div>
 
-      {showHotspotsLayer && (
+      {showLotHotspotsLayer && (
         <LotHotspotsLayer
           lots={lots}
           lotHotspots={topHotspots}
           fadingOut={hotspotsFadingOut}
           onHotspotClick={handleHotspotClick}
+        />
+      )}
+
+      {showFeatureHotspotsLayer && (
+        <FeatureHotspotsLayer
+          featureHotspots={frontFeatureHotspots}
+          fadingOut={hotspotsFadingOut}
+          onNavigate={handleFeatureNavigate}
+          onShowInfo={handleFeatureShowInfo}
         />
       )}
 
@@ -100,6 +156,10 @@ export function ShowroomExperience({
           onTransitionRequest={handleTransitionRequest}
         />
       </section>
+
+      {activeFeatureInfo && (
+        <FeatureInfoPopover feature={activeFeatureInfo} onClose={handleCloseFeatureInfo} />
+      )}
     </main>
   );
 }
