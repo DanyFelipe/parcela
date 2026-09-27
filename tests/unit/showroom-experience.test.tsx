@@ -26,6 +26,33 @@ const baseLotHotspots = [
   { id: 'hs-1', lot_id: 'lot-1', view_id: 'top' as const, hotspot_x: 50, hotspot_y: 50 },
 ];
 
+const baseFeatureHotspots = [
+  {
+    id: 'fs-1',
+    view_id: 'front' as const,
+    type: 'lots_overview' as const,
+    action: 'navigate_to_view' as const,
+    target_view_id: 'top' as const,
+    title: 'Ver lotes',
+    description: 'Explorar lotes disponibles.',
+    icon: 'layout-grid',
+    hotspot_x: 65,
+    hotspot_y: 45,
+  },
+  {
+    id: 'fs-2',
+    view_id: 'front' as const,
+    type: 'sales_office' as const,
+    action: 'show_info' as const,
+    target_view_id: null,
+    title: 'Caseta de ventas',
+    description: 'Atención de lunes a sábado.',
+    icon: 'home',
+    hotspot_x: 25,
+    hotspot_y: 55,
+  },
+];
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
@@ -208,5 +235,96 @@ describe('ShowroomExperience hotspot rendering', () => {
     await waitFor(() => {
       expect(useShowroomStore.getState().selectedLotId).toBe('lot-1');
     });
+  });
+});
+
+describe('ShowroomExperience feature hotspot rendering', () => {
+  beforeEach(() => {
+    useShowroomStore.setState({
+      currentView: 'front',
+      selectedLotId: null,
+      transitionInProgress: false,
+    });
+    HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+    HTMLMediaElement.prototype.load = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('renders feature hotspots only in the front view', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('feature-hotspots-layer')).toBeInTheDocument();
+  });
+
+  it('does not render feature hotspots in the top view', () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    expect(screen.queryByTestId('feature-hotspots-layer')).not.toBeInTheDocument();
+  });
+
+  it('opens the info popover when a show_info feature hotspot is clicked', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caseta de ventas' }));
+
+    expect(screen.getByTestId('feature-info-popover')).toBeInTheDocument();
+    expect(screen.getByText('Atención de lunes a sábado.')).toBeInTheDocument();
+  });
+
+  it('closes the info popover when clicking the close button', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caseta de ventas' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar información' }));
+
+    expect(screen.queryByTestId('feature-info-popover')).not.toBeInTheDocument();
+  });
+
+  it('navigates to top when lots_overview feature hotspot is clicked', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'front->top': 'https://example.com/front-to-top.mp4' }}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver lotes' }));
+
+    expect(useShowroomStore.getState().transitionInProgress).toBe(true);
   });
 });

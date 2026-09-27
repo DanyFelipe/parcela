@@ -27,11 +27,35 @@ export interface LotHotspotData {
   hotspot_y: number;
 }
 
+export type FeatureHotspotAction = 'navigate_to_view' | 'show_info';
+export type FeatureHotspotType =
+  | 'lots_overview'
+  | 'natural_feature'
+  | 'sales_office'
+  | 'main_access'
+  | 'amenity'
+  | 'viewpoint'
+  | 'future_phase';
+
+export interface FeatureHotspotData {
+  id: string;
+  view_id: ShowroomView;
+  type: FeatureHotspotType;
+  action: FeatureHotspotAction;
+  target_view_id: ShowroomView | null;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  hotspot_x: number;
+  hotspot_y: number;
+}
+
 export interface ShowroomData {
   views: ShowroomViewData[];
   transitionUrls: TransitionUrls;
   lots: LotData[];
   lotHotspots: LotHotspotData[];
+  featureHotspots: FeatureHotspotData[];
 }
 
 function isValidViewId(id: string): id is ShowroomView {
@@ -42,6 +66,22 @@ function isValidLotStatus(status: string): status is LotStatus {
   return status === 'available' || status === 'reserved' || status === 'sold';
 }
 
+function isValidFeatureHotspotAction(action: string): action is FeatureHotspotAction {
+  return action === 'navigate_to_view' || action === 'show_info';
+}
+
+function isValidFeatureHotspotType(type: string): type is FeatureHotspotType {
+  return [
+    'lots_overview',
+    'natural_feature',
+    'sales_office',
+    'main_access',
+    'amenity',
+    'viewpoint',
+    'future_phase',
+  ].includes(type);
+}
+
 export async function getShowroomData(): Promise<ShowroomData> {
   const supabase = await createClient();
   const [
@@ -49,6 +89,7 @@ export async function getShowroomData(): Promise<ShowroomData> {
     { data: transitions, error: transitionsError },
     { data: lots, error: lotsError },
     { data: lotHotspots, error: lotHotspotsError },
+    { data: featureHotspots, error: featureHotspotsError },
   ] = await Promise.all([
     supabase
       .from('views')
@@ -57,14 +98,20 @@ export async function getShowroomData(): Promise<ShowroomData> {
     supabase.from('view_transitions').select('from_view_id, to_view_id, video_url'),
     supabase.from('lots').select('id, name, price, status, surface_area'),
     supabase.from('lot_hotspots').select('id, lot_id, view_id, hotspot_x, hotspot_y'),
+    supabase
+      .from('feature_hotspots')
+      .select(
+        'id, view_id, type, action, target_view_id, title, description, icon, hotspot_x, hotspot_y'
+      ),
   ]);
 
-  if (viewsError || transitionsError || lotsError || lotHotspotsError) {
+  if (viewsError || transitionsError || lotsError || lotHotspotsError || featureHotspotsError) {
     console.error('Error loading showroom data', {
       viewsError,
       transitionsError,
       lotsError,
       lotHotspotsError,
+      featureHotspotsError,
     });
     throw new Error('No se pudo cargar la experiencia del terreno.');
   }
@@ -96,10 +143,26 @@ export async function getShowroomData(): Promise<ShowroomData> {
     );
   });
 
+  const validFeatureHotspots = (featureHotspots ?? []).filter(
+    (hotspot): hotspot is FeatureHotspotData => {
+      return (
+        typeof hotspot.id === 'string' &&
+        isValidViewId(hotspot.view_id) &&
+        isValidFeatureHotspotType(hotspot.type) &&
+        isValidFeatureHotspotAction(hotspot.action) &&
+        typeof hotspot.title === 'string' &&
+        typeof hotspot.hotspot_x === 'number' &&
+        typeof hotspot.hotspot_y === 'number' &&
+        (hotspot.target_view_id === null || isValidViewId(hotspot.target_view_id))
+      );
+    }
+  );
+
   return {
     views: validViews,
     transitionUrls,
     lots: validLots,
     lotHotspots: validLotHotspots,
+    featureHotspots: validFeatureHotspots,
   };
 }
