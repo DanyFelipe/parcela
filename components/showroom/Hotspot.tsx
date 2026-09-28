@@ -1,6 +1,7 @@
 'use client';
 
 import type { LotData, LotHotspotData } from '@/lib/showroom/showroom-data';
+import { lotStatusConfig, statusColorClass } from '@/lib/showroom/lot-status';
 
 export interface HotspotProps {
   lot: LotData;
@@ -8,23 +9,12 @@ export interface HotspotProps {
   onClick: (lotId: string) => void;
 }
 
-function statusColorClass(status: LotData['status']): string {
-  switch (status) {
-    case 'available':
-      return 'bg-emerald-500 shadow-emerald-500/50';
-    case 'reserved':
-      return 'bg-amber-500 shadow-amber-500/50';
-    case 'sold':
-      return 'bg-rose-500 shadow-rose-500/50';
-    default:
-      return 'bg-zinc-400 shadow-zinc-400/50';
-  }
-}
-
 export function Hotspot({ lot, hotspot, onClick }: HotspotProps) {
   function handleClick(): void {
     onClick(lot.id);
   }
+
+  const statusLabel = lotStatusConfig[lot.status]?.label ?? lot.status;
 
   return (
     <button
@@ -35,7 +25,7 @@ export function Hotspot({ lot, hotspot, onClick }: HotspotProps) {
         left: `${hotspot.hotspot_x}%`,
         top: `${hotspot.hotspot_y}%`,
       }}
-      aria-label={`Ver detalle de ${lot.name}`}
+      aria-label={`Ver detalle de ${lot.name} - ${statusLabel}`}
       data-testid="lot-hotspot"
       data-lot-id={lot.id}
       data-lot-status={lot.status}
