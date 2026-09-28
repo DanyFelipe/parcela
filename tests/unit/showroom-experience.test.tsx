@@ -7,9 +7,13 @@ import { ShowroomExperience } from '@/components/showroom/ShowroomExperience';
 import { useShowroomStore } from '@/lib/store/showroom.store';
 
 const baseViews = [
-  { id: 'front' as const, base_image_url: 'https://placehold.co/front.webp' },
-  { id: 'rear' as const, base_image_url: 'https://placehold.co/rear.webp' },
-  { id: 'top' as const, base_image_url: 'https://placehold.co/top.webp' },
+  { id: 'front' as const, base_image_url: 'https://placehold.co/front.webp', alt_image_url: null },
+  { id: 'rear' as const, base_image_url: 'https://placehold.co/rear.webp', alt_image_url: null },
+  {
+    id: 'top' as const,
+    base_image_url: 'https://placehold.co/top.webp',
+    alt_image_url: 'https://placehold.co/top-no-grid.webp',
+  },
 ];
 
 const viewAltText = {
@@ -401,5 +405,107 @@ describe('ShowroomExperience feature hotspot rendering', () => {
 
     const viewControls = screen.getByRole('navigation', { name: 'Controles de vista' });
     expect(viewControls).toHaveClass('pointer-events-auto');
+  });
+});
+
+describe('ShowroomExperience grid toggle', () => {
+  beforeEach(() => {
+    useShowroomStore.setState({
+      currentView: 'top',
+      selectedLotId: null,
+      transitionInProgress: false,
+    });
+    HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+    HTMLMediaElement.prototype.load = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('renders the grid toggle only in the top view when alt_image_url exists', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('grid-toggle')).toBeInTheDocument();
+  });
+
+  it('does not render the grid toggle when top has no alt_image_url', () => {
+    const viewsWithoutAlt = baseViews.map((view) =>
+      view.id === 'top' ? { ...view, alt_image_url: null } : view
+    );
+
+    render(
+      <ShowroomExperience
+        views={viewsWithoutAlt}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.queryByTestId('grid-toggle')).not.toBeInTheDocument();
+  });
+
+  it('does not render the grid toggle in the front view', () => {
+    useShowroomStore.setState({ currentView: 'front', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.queryByTestId('grid-toggle')).not.toBeInTheDocument();
+  });
+
+  it('toggles between base and alt images when the grid toggle is clicked', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('showroom-base-image')).toHaveClass('opacity-100');
+    expect(screen.getByTestId('showroom-alt-image')).toHaveClass('opacity-0');
+
+    fireEvent.click(screen.getByTestId('grid-toggle'));
+
+    expect(screen.getByTestId('showroom-base-image')).toHaveClass('opacity-0');
+    expect(screen.getByTestId('showroom-alt-image')).toHaveClass('opacity-100');
+  });
+
+  it('keeps lot hotspots rendered after toggling the grid', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('grid-toggle'));
+
+    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
   });
 });

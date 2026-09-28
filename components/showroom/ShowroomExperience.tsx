@@ -9,6 +9,7 @@ import {
   FeatureInfoPopover,
   type FeatureHotspotInfo,
 } from '@/components/showroom/FeatureInfoPopover';
+import { GridToggle } from '@/components/showroom/GridToggle';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
@@ -23,7 +24,7 @@ import { resolveTransitionVideoUrl } from '@/lib/transitions/transition-resolver
 import type { TransitionUrls } from '@/lib/transitions/transition-resolver';
 
 interface ShowroomExperienceProps {
-  views: Pick<ShowroomViewData, 'id' | 'base_image_url'>[];
+  views: Pick<ShowroomViewData, 'id' | 'base_image_url' | 'alt_image_url'>[];
   transitionUrls: TransitionUrls;
   viewAltText: Record<ShowroomView, string>;
   lots?: LotData[];
@@ -47,6 +48,7 @@ export function ShowroomExperience({
   const selectLot = useShowroomStore((state) => state.selectLot);
   const [pendingTransition, setPendingTransition] = useState<ViewTransitionRequest | null>(null);
   const [activeFeatureInfo, setActiveFeatureInfo] = useState<FeatureHotspotInfo | null>(null);
+  const [showGrid, setShowGrid] = useState(true);
   const currentViewData = views.find((view) => view.id === currentView) ?? views[0];
 
   if (!currentViewData) {
@@ -95,6 +97,10 @@ export function ShowroomExperience({
     setActiveFeatureInfo(null);
   }
 
+  function handleToggleGrid(): void {
+    setShowGrid((previous) => !previous);
+  }
+
   const destinationView = pendingTransition?.toView ?? currentView;
   const destinationViewData = views.find((view) => view.id === destinationView) ?? currentViewData;
   const showTransition =
@@ -111,16 +117,39 @@ export function ShowroomExperience({
   const frontFeatureHotspots = featureHotspots.filter(
     (hotspot) => hotspot.view_id === VIEW_WITH_FEATURE_HOTSPOTS
   );
+  const hasGridToggle =
+    currentView === VIEW_WITH_LOT_HOTSPOTS && currentViewData.alt_image_url !== null;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
       <div className="absolute inset-0">
-        <img
-          src={currentViewData.base_image_url}
-          alt={viewAltText[currentViewData.id]}
-          className="h-full w-full object-cover"
-          data-testid="showroom-base-image"
-        />
+        {hasGridToggle ? (
+          <>
+            <img
+              src={currentViewData.base_image_url}
+              alt={viewAltText[currentViewData.id]}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
+                showGrid ? 'opacity-100' : 'opacity-0'
+              }`}
+              data-testid="showroom-base-image"
+            />
+            <img
+              src={currentViewData.alt_image_url!}
+              alt={viewAltText[currentViewData.id]}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
+                showGrid ? 'opacity-0' : 'opacity-100'
+              }`}
+              data-testid="showroom-alt-image"
+            />
+          </>
+        ) : (
+          <img
+            src={currentViewData.base_image_url}
+            alt={viewAltText[currentViewData.id]}
+            className="h-full w-full object-cover"
+            data-testid="showroom-base-image"
+          />
+        )}
       </div>
 
       {showLotHotspotsLayer && (
@@ -158,10 +187,19 @@ export function ShowroomExperience({
             Explora las vistas del proyecto y conoce cada espacio.
           </p>
         </div>
-        <ViewControls
-          transitionUrls={transitionUrls}
-          onTransitionRequest={handleTransitionRequest}
-        />
+        <div className="flex items-center gap-2">
+          <ViewControls
+            transitionUrls={transitionUrls}
+            onTransitionRequest={handleTransitionRequest}
+          />
+          {hasGridToggle && (
+            <GridToggle
+              showGrid={showGrid}
+              onToggle={handleToggleGrid}
+              disabled={transitionInProgress}
+            />
+          )}
+        </div>
       </section>
 
       <FeatureInfoPopover feature={activeFeatureInfo} onClose={handleCloseFeatureInfo} />
