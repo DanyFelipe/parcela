@@ -157,9 +157,7 @@ export function ShowroomExperience({
         />
       </section>
 
-      {activeFeatureInfo && (
-        <FeatureInfoPopover feature={activeFeatureInfo} onClose={handleCloseFeatureInfo} />
-      )}
+      <FeatureInfoPopover feature={activeFeatureInfo} onClose={handleCloseFeatureInfo} />
     </main>
   );
 }

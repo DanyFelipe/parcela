@@ -86,7 +86,7 @@ Objetivo: navegación hacia `top`, hotspots de lote funcionando ahí, y los `fea
 | PARC-205 | Patrón fade-out/fade-in de hotspots al iniciar/terminar transición                                                                                                                                                                   | 🟡        | 2          | Done |
 | PARC-206 | Seed: `feature_hotspots` en `front` (mínimo: `lots_overview`, `sales_office`)                                                                                                                                                        | 🟡        | 1          | Done |
 | PARC-207 | Componente `FeatureHotspot` + despacho `navigate_to_view` vs `show_info`                                                                                                                                                             | 🟡        | 5          | Done |
-| PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          |
+| PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          | Done |
 | PARC-209 | Toggle de grid en vista `top` (`base_image_url` ↔ `alt_image_url`)                                                                                                                                                                   | 🟢        | 2          |
 | PARC-210 | Consejo UX de saturación: marcadores pequeños + color por `status`                                                                                                                                                                   | 🟡        | 3          |
 | PARC-211 | Test E2E: flujo completo front → top (control o hotspot `lots_overview`) → click en lote                                                                                                                                             | 🟡        | 3          |
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-26 · **Versión:** 1.9
+**Última actualización:** 2026-09-27 · **Versión:** 2.0

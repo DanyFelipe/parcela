@@ -8,6 +8,10 @@ Si una instrucción del usuario en el chat contradice algo escrito en estos docu
 
 **Excepción (decisión adoptada explícitamente por el usuario):** cuando la instrucción en el chat **es** una modificación deliberada de uno de estos documentos pedida por el propio usuario (ej. "borra el 05", "agrega esta regla"), se aplica directamente — el conflicto no existe, el chat _es_ la aprobación. Se aplica el proceso de versionado de la sección correspondiente.
 
+## Descripción en Markdown para GitHub
+
+Siempre que se complete un ticket, commit o push, el agente entrega en el chat — además del resumen normal — una **descripción en formato Markdown dentro de un bloque de código**, lista para copiar y pegar directamente en GitHub (PR, comentario de commit o release notes). Ese bloque debe incluir mínimo: título con el ticket (`PARC-XXX`), qué se hizo, piezas nuevas/modificadas y checks ejecutados. No omitir este entregable aunque el resumen en prosa ya exista.
+
 ## Mapa de documentos
 
 | Documento                                            | Cuándo cargarlo                                                                                                                                                       |
@@ -51,4 +55,4 @@ Cualquier cambio a estos documentos que altere una decisión ya tomada (no una c
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.3
+**Última actualización:** 2026-09-26 · **Versión:** 1.4
