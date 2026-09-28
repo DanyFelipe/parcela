@@ -102,8 +102,8 @@ Objetivo: los dos niveles de información del lote, con la página completa cump
 
 | Ticket   | Título                                                                                            | Prioridad | Estimación |
 | -------- | ------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-301 | Componente `HotspotPreviewCard` (modal rápido: precio, superficie, estado)                        | 🔴        | 3          | Done |     | 🔴  | 3   | In Progress |     | 🔴  | 3   |
-| PARC-302 | `app/lot/[id]/page.tsx`: Server Component con datos completos del lote                            | 🔴        | 5          |
+| PARC-301 | Componente `HotspotPreviewCard` (modal rápido: precio, superficie, estado)                        | 🔴        | 3          | Done |
+| PARC-302 | `app/lot/[id]/page.tsx`: Server Component con datos completos del lote                            | 🔴        | 5          | Done |
 | PARC-303 | `generateMetadata` dinámico (title, description) por lote                                         | 🔴        | 2          |
 | PARC-304 | Open Graph (`og:image`) + JSON-LD (schema.org) por lote                                           | 🟡        | 3          |
 | PARC-305 | `app/sitemap.ts` dinámico generado desde `lots`                                                   | 🟡        | 2          |
