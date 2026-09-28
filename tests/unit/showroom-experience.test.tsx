@@ -221,7 +221,7 @@ describe('ShowroomExperience hotspot rendering', () => {
     });
   });
 
-  it('selects a lot when its hotspot is clicked', async () => {
+  it('selects a lot and opens the preview card when its hotspot is clicked', async () => {
     useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
 
     render(
@@ -239,6 +239,99 @@ describe('ShowroomExperience hotspot rendering', () => {
     await waitFor(() => {
       expect(useShowroomStore.getState().selectedLotId).toBe('lot-1');
     });
+    expect(screen.getByTestId('hotspot-preview-card')).toBeInTheDocument();
+  });
+
+  it('closes the preview card when clicking the close button', async () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
+    await waitFor(() => {
+      expect(screen.getByTestId('hotspot-preview-card')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar vista previa' }));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('hotspot-preview-card')).not.toBeInTheDocument();
+    });
+  });
+
+  it('closes the preview card when starting a transition away from top', async () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'top->front': 'https://example.com/top-to-front.mp4' }}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
+    await waitFor(() => {
+      expect(screen.getByTestId('hotspot-preview-card')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a vista frontal' }));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('hotspot-preview-card')).not.toBeInTheDocument();
+    });
+  });
+
+  it('switches the preview content when another lot hotspot is clicked', async () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
+
+    const secondLot = {
+      id: 'lot-2',
+      name: 'Lote A-02',
+      price: 90000,
+      status: 'reserved' as const,
+      surface_area: 450,
+    };
+    const secondHotspot = {
+      id: 'hs-2',
+      lot_id: 'lot-2',
+      view_id: 'top' as const,
+      hotspot_x: 60,
+      hotspot_y: 60,
+    };
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={[...baseLots, secondLot]}
+        lotHotspots={[...baseLotHotspots, secondHotspot]}
+      />
+    );
+
+    fireEvent.click(screen.getAllByTestId('lot-hotspot')[0]);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Lote A-01' })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getAllByTestId('lot-hotspot')[1]);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Lote A-02' })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('heading', { name: 'Lote A-01' })).not.toBeInTheDocument();
   });
 });
 

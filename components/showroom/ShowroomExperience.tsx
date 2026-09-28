@@ -10,6 +10,7 @@ import {
   type FeatureHotspotInfo,
 } from '@/components/showroom/FeatureInfoPopover';
 import { GridToggle } from '@/components/showroom/GridToggle';
+import { HotspotPreviewCard } from '@/components/showroom/HotspotPreviewCard';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
 import { LotStatusLegend } from '@/components/showroom/LotStatusLegend';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
@@ -47,6 +48,7 @@ export function ShowroomExperience({
 }: ShowroomExperienceProps) {
   const currentView = useShowroomStore((state) => state.currentView);
   const transitionInProgress = useShowroomStore((state) => state.transitionInProgress);
+  const selectedLotId = useShowroomStore((state) => state.selectedLotId);
   const selectLot = useShowroomStore((state) => state.selectLot);
   const [pendingTransition, setPendingTransition] = useState<ViewTransitionRequest | null>(null);
   const [activeFeatureInfo, setActiveFeatureInfo] = useState<FeatureHotspotInfo | null>(null);
@@ -59,6 +61,7 @@ export function ShowroomExperience({
 
   function handleTransitionRequest(request: ViewTransitionRequest): void {
     setActiveFeatureInfo(null);
+    selectLot(null);
     setPendingTransition(request);
   }
 
@@ -74,6 +77,7 @@ export function ShowroomExperience({
     }
 
     setActiveFeatureInfo(null);
+    selectLot(null);
     setPendingTransition({
       fromView: currentView,
       toView: targetViewId,
@@ -97,6 +101,10 @@ export function ShowroomExperience({
 
   function handleCloseFeatureInfo(): void {
     setActiveFeatureInfo(null);
+  }
+
+  function handleClosePreview(): void {
+    selectLot(null);
   }
 
   function handleToggleGrid(): void {
@@ -130,6 +138,8 @@ export function ShowroomExperience({
         .filter((status): status is LotStatus => status !== undefined)
     )
   );
+  const selectedLot = selectedLotId ? (lotById.get(selectedLotId) ?? null) : null;
+  const showPreviewCard = currentView === VIEW_WITH_LOT_HOTSPOTS && selectedLot !== null;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
@@ -218,6 +228,8 @@ export function ShowroomExperience({
       </section>
 
       <FeatureInfoPopover feature={activeFeatureInfo} onClose={handleCloseFeatureInfo} />
+
+      <HotspotPreviewCard lot={showPreviewCard ? selectedLot : null} onClose={handleClosePreview} />
     </main>
   );
 }
