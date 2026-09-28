@@ -127,4 +127,10 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 quitó el cursor pointer por defecto en botones; se restaura
+     para todo elemento accionable (hotspots, controles, botones de shadcn/ui). */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
 }

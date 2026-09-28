@@ -70,6 +70,19 @@ export const lotSchema = z.object({
 });
 
 /**
+ * Shape público de un lote para la ficha completa (`/lot/[id]`).
+ *
+ * Es `lotSchema` sin los campos internos/administrativos (`created_at`,
+ * `updated_at`, `updated_by`), que no se exponen al visitante del showroom.
+ * Debe coincidir exactamente con las columnas que selecciona `getLotById`.
+ */
+export const lotDetailSchema = lotSchema.omit({
+  created_at: true,
+  updated_at: true,
+  updated_by: true,
+});
+
+/**
  * Shape base para insert/update. No incluye campos generados por la base de datos
  * (`id`, `created_at`, `updated_at`, `updated_by`).
  */
@@ -109,5 +122,6 @@ export const lotInsertSchema = lotInputBaseSchema.extend({
 export const lotUpdateSchema = lotInputBaseSchema.partial();
 
 export type LotSchema = z.infer<typeof lotSchema>;
+export type LotDetailSchema = z.infer<typeof lotDetailSchema>;
 export type LotInsertSchema = z.infer<typeof lotInsertSchema>;
 export type LotUpdateSchema = z.infer<typeof lotUpdateSchema>;

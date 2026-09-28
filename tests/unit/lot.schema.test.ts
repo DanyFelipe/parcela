@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   legalStatusSchema,
+  lotDetailSchema,
   lotInsertSchema,
   lotSchema,
   lotStatusSchema,
@@ -72,6 +73,48 @@ describe('lotSchema', () => {
 
   it('rejects an invalid legal status value', () => {
     expect(() => lotSchema.parse({ ...baseLot, legal_status: 'other' })).toThrow();
+  });
+});
+
+describe('lotDetailSchema', () => {
+  const publicLot = {
+    id: 'd2519ea0-6e12-449d-9588-eb3cff4a9691',
+    name: 'Lote A-01',
+    price: 100000,
+    status: 'available',
+    surface_area: 500,
+    orientation: 'Norte',
+    image_360_url: null,
+    technical_plan_url: null,
+    soil_type: 'Arcilloso',
+    has_water_service: true,
+    has_electricity_service: false,
+    has_sewage_service: false,
+    legal_status: 'titled',
+    encumbrances: null,
+    registry_number: '12345',
+    description: 'Lote amplio con vista al lago.',
+  };
+
+  it('validates the public lot shape without internal columns', () => {
+    expect(lotDetailSchema.parse(publicLot)).toEqual(publicLot);
+  });
+
+  it('strips internal columns if they are present', () => {
+    const result = lotDetailSchema.parse({
+      ...publicLot,
+      created_at: '2026-09-28T00:00:00Z',
+      updated_at: '2026-09-28T00:00:00Z',
+      updated_by: null,
+    });
+
+    expect(result).not.toHaveProperty('created_at');
+    expect(result).not.toHaveProperty('updated_at');
+    expect(result).not.toHaveProperty('updated_by');
+  });
+
+  it('rejects an invalid status', () => {
+    expect(() => lotDetailSchema.parse({ ...publicLot, status: 'pending' })).toThrow();
   });
 });
 
