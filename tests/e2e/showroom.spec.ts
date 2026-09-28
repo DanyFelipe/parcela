@@ -23,4 +23,36 @@ test.describe('showroom view navigation', () => {
       page.getByRole('button', { name: 'Rotar entre vista frontal y posterior' })
     ).toBeEnabled();
   });
+
+  test('navigates from front to top via view control and clicks a lot hotspot', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await expect(page.getByAltText('Vista frontal del terreno')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Ver vista aérea' }).click();
+
+    await expect(page.getByTestId('showroom-base-image')).toBeVisible();
+
+    const lotHotspot = page.getByTestId('lot-hotspot').first();
+    await expect(lotHotspot).toBeVisible();
+    await lotHotspot.click();
+  });
+
+  test('navigates from front to top via lots_overview feature hotspot and clicks a lot hotspot', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await expect(page.getByAltText('Vista frontal del terreno')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Ver lotes' }).click();
+
+    await expect(page.getByTestId('showroom-base-image')).toBeVisible();
+
+    const lotHotspot = page.getByTestId('lot-hotspot').first();
+    await expect(lotHotspot).toBeVisible();
+    await lotHotspot.click();
+  });
 });

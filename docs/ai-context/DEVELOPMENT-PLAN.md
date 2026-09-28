@@ -89,8 +89,8 @@ Objetivo: navegación hacia `top`, hotspots de lote funcionando ahí, y los `fea
 | PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          | Done |
 | PARC-209 | Toggle de grid en vista `top` (`base_image_url` ↔ `alt_image_url`)                                                                                                                                                                   | 🟢        | 2          | Done |
 | PARC-210 | Consejo UX de saturación: marcadores pequeños + color por `status`                                                                                                                                                                   | 🟡        | 3          | Done |
-| PARC-211 | Test E2E: flujo completo front → top (control o hotspot `lots_overview`) → click en lote                                                                                                                                             | 🟡        | 3          |
-| PARC-212 | Schema de validación Zod del lote (`lib/validations/lot.schema.ts`) alineado a `docs/schema.sql` — sin UI de CRUD todavía (ver `02-architecture.md` §0: definir la validación desde ya, aunque hoy nadie la use desde un formulario) | 🟡        | 3          |
+| PARC-211 | Test E2E: flujo completo front → top (control o hotspot `lots_overview`) → click en lote                                                                                                                                             | 🟡        | 3          | Done |
+| PARC-212 | Schema de validación Zod del lote (`lib/validations/lot.schema.ts`) alineado a `docs/schema.sql` — sin UI de CRUD todavía (ver `02-architecture.md` §0: definir la validación desde ya, aunque hoy nadie la use desde un formulario) | 🟡        | 3          | Done |
 
 **Criterio de salida del sprint:** el usuario puede llegar a `top` de dos formas (control dedicado o hotspot `lots_overview`), ver los lotes marcados con color según estado, y clickear uno.
 
@@ -198,4 +198,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-09-28 · **Versión:** 2.2
+**Última actualización:** 2026-09-28 · **Versión:** 2.3
