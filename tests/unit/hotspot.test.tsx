@@ -48,7 +48,7 @@ describe('Hotspot', () => {
   it('calls onClick with the lot id when clicked', () => {
     render(<Hotspot lot={baseLot} hotspot={baseHotspot} onClick={onClick} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Lote A-01' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Lote A-01 - Disponible' }));
 
     expect(onClick).toHaveBeenCalledWith('lot-1');
   });
@@ -56,7 +56,7 @@ describe('Hotspot', () => {
   it('is keyboard accessible', () => {
     render(<Hotspot lot={baseLot} hotspot={baseHotspot} onClick={onClick} />);
 
-    const button = screen.getByRole('button', { name: 'Ver detalle de Lote A-01' });
+    const button = screen.getByRole('button', { name: 'Ver detalle de Lote A-01 - Disponible' });
     button.focus();
     fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
     fireEvent.click(button);
@@ -68,6 +68,14 @@ describe('Hotspot', () => {
     render(<Hotspot lot={baseLot} hotspot={baseHotspot} onClick={onClick} />);
 
     expect(screen.getByText('Lote A-01')).toBeInTheDocument();
+  });
+
+  it('includes the status in the accessible name', () => {
+    render(<Hotspot lot={baseLot} hotspot={baseHotspot} onClick={onClick} />);
+
+    expect(
+      screen.getByRole('button', { name: 'Ver detalle de Lote A-01 - Disponible' })
+    ).toBeInTheDocument();
   });
 
   it.each([

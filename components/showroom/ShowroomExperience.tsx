@@ -11,12 +11,14 @@ import {
 } from '@/components/showroom/FeatureInfoPopover';
 import { GridToggle } from '@/components/showroom/GridToggle';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
+import { LotStatusLegend } from '@/components/showroom/LotStatusLegend';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
 import type {
   FeatureHotspotData,
   LotData,
   LotHotspotData,
+  LotStatus,
   ShowroomViewData,
 } from '@/lib/showroom/showroom-data';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
@@ -120,6 +122,15 @@ export function ShowroomExperience({
   const hasGridToggle =
     currentView === VIEW_WITH_LOT_HOTSPOTS && currentViewData.alt_image_url !== null;
 
+  const lotById = new Map(lots.map((lot) => [lot.id, lot]));
+  const visibleLotStatuses = Array.from(
+    new Set(
+      topHotspots
+        .map((hotspot) => lotById.get(hotspot.lot_id)?.status)
+        .filter((status): status is LotStatus => status !== undefined)
+    )
+  );
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
       <div className="absolute inset-0">
@@ -151,6 +162,10 @@ export function ShowroomExperience({
           />
         )}
       </div>
+
+      {showLotHotspotsLayer && visibleLotStatuses.length > 0 && (
+        <LotStatusLegend statuses={visibleLotStatuses} fadingOut={hotspotsFadingOut} />
+      )}
 
       {showLotHotspotsLayer && (
         <LotHotspotsLayer

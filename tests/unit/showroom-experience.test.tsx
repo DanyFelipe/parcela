@@ -509,3 +509,99 @@ describe('ShowroomExperience grid toggle', () => {
     expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
   });
 });
+
+describe('ShowroomExperience lot status legend', () => {
+  beforeEach(() => {
+    useShowroomStore.setState({
+      currentView: 'top',
+      selectedLotId: null,
+      transitionInProgress: false,
+    });
+    HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+    HTMLMediaElement.prototype.load = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('renders the legend in the top view with the statuses of visible lots', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-status-legend')).toBeInTheDocument();
+    expect(screen.getByText('Disponible')).toBeInTheDocument();
+  });
+
+  it('does not render the legend in the front view', () => {
+    useShowroomStore.setState({ currentView: 'front', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.queryByTestId('lot-status-legend')).not.toBeInTheDocument();
+  });
+
+  it('fades out the legend when a transition starts', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'top->front': 'https://example.com/top-to-front.mp4' }}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    expect(screen.getByTestId('lot-status-legend')).toHaveClass('opacity-100');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a vista frontal' }));
+
+    expect(screen.getByTestId('lot-status-legend')).toHaveClass('opacity-0');
+  });
+
+  it('only shows statuses that are present in visible lots', () => {
+    const soldLot = {
+      id: 'lot-2',
+      name: 'Lote A-02',
+      price: 80000,
+      status: 'sold' as const,
+      surface_area: 450,
+    };
+    const soldHotspot = {
+      id: 'hs-2',
+      lot_id: 'lot-2',
+      view_id: 'top' as const,
+      hotspot_x: 60,
+      hotspot_y: 60,
+    };
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={[baseLots[0], soldLot]}
+        lotHotspots={[baseLotHotspots[0], soldHotspot]}
+      />
+    );
+
+    expect(screen.getByText('Disponible')).toBeInTheDocument();
+    expect(screen.getByText('Vendido')).toBeInTheDocument();
+    expect(screen.queryByText('Reservado')).not.toBeInTheDocument();
+  });
+});
