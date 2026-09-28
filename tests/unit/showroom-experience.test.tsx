@@ -313,6 +313,61 @@ describe('ShowroomExperience feature hotspot rendering', () => {
     expect(screen.queryByTestId('feature-info-popover')).not.toBeInTheDocument();
   });
 
+  it('closes the active info popover when its feature hotspot is clicked again', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    const salesOfficeHotspot = screen.getByRole('button', { name: 'Caseta de ventas' });
+    fireEvent.click(salesOfficeHotspot);
+    expect(screen.getByTestId('feature-info-popover')).toBeInTheDocument();
+
+    fireEvent.click(salesOfficeHotspot);
+
+    expect(screen.queryByTestId('feature-info-popover')).not.toBeInTheDocument();
+  });
+
+  it('closes the active info popover when navigation starts from ViewControls', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'front->top': 'https://example.com/front-to-top.mp4' }}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caseta de ventas' }));
+    expect(screen.getByTestId('feature-info-popover')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver vista aérea' }));
+
+    expect(screen.queryByTestId('feature-info-popover')).not.toBeInTheDocument();
+  });
+
+  it('closes the active info popover when navigation starts from a feature hotspot', () => {
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{ 'front->top': 'https://example.com/front-to-top.mp4' }}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caseta de ventas' }));
+    expect(screen.getByTestId('feature-info-popover')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver lotes' }));
+
+    expect(screen.queryByTestId('feature-info-popover')).not.toBeInTheDocument();
+  });
+
   it('navigates to top when lots_overview feature hotspot is clicked', () => {
     render(
       <ShowroomExperience
@@ -326,5 +381,25 @@ describe('ShowroomExperience feature hotspot rendering', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver lotes' }));
 
     expect(useShowroomStore.getState().transitionInProgress).toBe(true);
+  });
+
+  it('keeps decorative overlays out of the pointer-events path so hotspots stay clickable', () => {
+    const { container } = render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        featureHotspots={baseFeatureHotspots}
+      />
+    );
+
+    const scrim = container.querySelector('.bg-black\\/20');
+    expect(scrim).toHaveClass('pointer-events-none');
+
+    const uiSection = container.querySelector('section');
+    expect(uiSection).toHaveClass('pointer-events-none');
+
+    const viewControls = screen.getByRole('navigation', { name: 'Controles de vista' });
+    expect(viewControls).toHaveClass('pointer-events-auto');
   });
 });

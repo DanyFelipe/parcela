@@ -54,6 +54,7 @@ export function ShowroomExperience({
   }
 
   function handleTransitionRequest(request: ViewTransitionRequest): void {
+    setActiveFeatureInfo(null);
     setPendingTransition(request);
   }
 
@@ -68,6 +69,7 @@ export function ShowroomExperience({
       return;
     }
 
+    setActiveFeatureInfo(null);
     setPendingTransition({
       fromView: currentView,
       toView: targetViewId,
@@ -76,6 +78,11 @@ export function ShowroomExperience({
   }
 
   function handleFeatureShowInfo(feature: FeatureHotspotData): void {
+    if (activeFeatureInfo?.id === feature.id) {
+      setActiveFeatureInfo(null);
+      return;
+    }
+
     setActiveFeatureInfo({
       id: feature.id,
       title: feature.title,
@@ -142,8 +149,8 @@ export function ShowroomExperience({
         />
       )}
 
-      <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
-      <section className="relative z-10 flex min-h-screen flex-col items-start justify-end gap-6 p-6 sm:p-10">
+      <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden="true" />
+      <section className="pointer-events-none relative z-10 flex min-h-screen flex-col items-start justify-end gap-6 p-6 sm:p-10">
         <div className="max-w-md rounded-lg bg-black/55 p-5 backdrop-blur-sm">
           <p className="text-sm uppercase tracking-[0.2em] text-white/70">Parcela</p>
           <h1 className="mt-2 text-3xl font-semibold">Descubre tu próximo terreno</h1>

@@ -62,7 +62,7 @@ export function ViewControls({ transitionUrls, onTransitionRequest }: ViewContro
   }
 
   return (
-    <nav aria-label="Controles de vista" className="flex items-center gap-2">
+    <nav aria-label="Controles de vista" className="pointer-events-auto flex items-center gap-2">
       <Button
         type="button"
         variant="ghost"

@@ -379,6 +379,8 @@ function handleFeatureClick(hotspot: FeatureHotspot) {
 **Reglas para el agente de IA:**
 
 - `FeatureInfoPopover` es un componente de UI simple (Framer Motion, fade), **nunca** dispara el `TransitionPlayer` — solo `lots_overview` navega.
+- Un hotspot con `action = 'show_info'` funciona como toggle: al pulsar de nuevo el hotspot activo, su `FeatureInfoPopover` se cierra; pulsar otro hotspot de información cambia el contenido del panel.
+- `FeatureInfoPopover` se cierra al solicitar cualquier navegación válida entre vistas, tanto desde un feature hotspot `navigate_to_view` como desde `ViewControls`. El cierre ocurre al iniciar la navegación y no depende de que el clip exista, cargue o termine; un panel de `front` no debe persistir sobre otra vista.
 - No inventar un `type` nuevo fuera del `check` de `feature_hotspots` sin antes confirmarlo con el usuario y agregarlo vía migración — la lista de tipos es intencionalmente acotada para no saturar visualmente la vista `front` (ver razón de diseño en la respuesta que originó esta sección: más de 6-7 tipos de hotspot especial empieza a competir con el propósito de impacto visual de esta vista).
 - `rear` no lleva `feature_hotspots` en el modelo base — si un cliente puntual lo necesitara, se evalúa como extensión específica de ese cliente, no como parte de la plantilla base.
 
@@ -554,4 +556,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-09-24 · **Versión:** 3.3
+**Última actualización:** 2026-09-27 · **Versión:** 3.4
