@@ -31,7 +31,7 @@ export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps
       {feature && (
         <motion.div
           key={feature.id}
-          className="absolute inset-x-0 bottom-0 z-20 flex justify-center p-6 sm:bottom-6"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-6 sm:bottom-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby={`feature-title-${feature.id}`}
@@ -41,7 +41,7 @@ export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
-          <div className="relative w-full max-w-md rounded-lg bg-black/75 p-5 text-white shadow-lg backdrop-blur-sm">
+          <div className="pointer-events-auto relative w-full max-w-md rounded-lg bg-black/75 p-5 text-white shadow-lg backdrop-blur-sm">
             <Button
               type="button"
               variant="ghost"
