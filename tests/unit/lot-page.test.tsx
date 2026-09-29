@@ -41,7 +41,7 @@ describe('LotPage generateMetadata', () => {
 
     const metadata = await generateMetadata({ params: createParams(baseLot.id) });
 
-    expect(metadata.title).toBe('Lote A-01 — Parcela');
+    expect(metadata.title).toBe('Lote A-01 · 500 m² · Disponible');
     expect(metadata.description).toContain('500 m²');
     expect(metadata.description).toContain('disponible');
   });
