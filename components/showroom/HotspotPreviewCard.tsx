@@ -8,28 +8,13 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from 'cn';
+import { formatPrice, formatSurface } from '@/lib/showroom/lot-formatting';
 import type { LotData } from '@/lib/showroom/showroom-data';
 import { lotStatusConfig } from '@/lib/showroom/lot-status';
 
 interface HotspotPreviewCardProps {
   lot: LotData | null;
   onClose: () => void;
-}
-
-function formatPrice(price: number | null): string {
-  if (price === null) {
-    return 'Consultar precio';
-  }
-
-  return `$ ${price.toLocaleString('es-AR')}`;
-}
-
-function formatSurface(area: number | null): string {
-  if (area === null) {
-    return 'Superficie no disponible';
-  }
-
-  return `${area.toLocaleString('es-AR')} m²`;
 }
 
 export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {

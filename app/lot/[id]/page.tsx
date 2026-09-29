@@ -5,27 +5,13 @@ import { ArrowLeft, Check, X } from 'lucide-react';
 
 import { buttonVariants } from '@/components/ui/button';
 import { getLotById, type LotDetails } from '@/lib/showroom/lot-data';
+import { formatPrice, formatSurface } from '@/lib/showroom/lot-formatting';
+import { buildLotMetadata } from '@/lib/showroom/lot-metadata';
 import { lotStatusConfig } from '@/lib/showroom/lot-status';
 import { cn } from '@/lib/utils';
 
 interface LotPageProps {
   params: Promise<{ id: string }>;
-}
-
-function formatPrice(price: number | null): string {
-  if (price === null) {
-    return 'Consultar precio';
-  }
-
-  return `$ ${price.toLocaleString('es-AR')}`;
-}
-
-function formatSurface(area: number | null): string {
-  if (area === null) {
-    return 'Superficie no disponible';
-  }
-
-  return `${area.toLocaleString('es-AR')} m²`;
 }
 
 const legalStatusLabels: Record<NonNullable<LotDetails['legal_status']>, string> = {
@@ -38,16 +24,7 @@ export async function generateMetadata({ params }: LotPageProps): Promise<Metada
   const { id } = await params;
   const lot = await getLotById(id);
 
-  if (!lot) {
-    return {
-      title: 'Lote no encontrado',
-    };
-  }
-
-  return {
-    title: `${lot.name} — Parcela`,
-    description: `Ficha técnica de ${lot.name}: ${formatSurface(lot.surface_area)}, ${lotStatusConfig[lot.status].label.toLowerCase()}.`,
-  };
+  return buildLotMetadata(lot);
 }
 
 export default async function LotPage({ params }: LotPageProps) {
