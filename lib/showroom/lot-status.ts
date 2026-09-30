@@ -30,3 +30,11 @@ export function statusColorClass(status: LotStatus): string {
 
   return `${config.dotClass} ${config.shadowClass}`;
 }
+
+export type LotLegalStatus = 'titled' | 'in_process' | 'not_titled';
+
+export const legalStatusLabels: Record<LotLegalStatus, string> = {
+  titled: 'Con escritura',
+  in_process: 'En trámite',
+  not_titled: 'Sin escritura',
+};
