@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 
-import { buttonVariants } from '@/components/ui/button';
+import { BackToShowroomLink } from '@/components/showroom/BackToShowroomLink';
 import { LotServices } from '@/components/showroom/LotServices';
 import { LotSpecs } from '@/components/showroom/LotSpecs';
 import { LotTechnicalPlan } from '@/components/showroom/LotTechnicalPlan';
@@ -46,16 +44,9 @@ export default async function LotPage({ params }: LotPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <Link
-          href="/"
-          className={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'mb-6 text-white/80 hover:bg-white/10 hover:text-white'
-          )}
-        >
-          <ArrowLeft className="mr-2 size-4" />
-          Volver al showroom
-        </Link>
+        <div className="mb-6">
+          <BackToShowroomLink />
+        </div>
 
         <header className="mb-10">
           <div className="flex flex-wrap items-center gap-3">
