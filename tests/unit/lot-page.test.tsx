@@ -34,6 +34,7 @@ function createParams(id: string): Promise<{ id: string }> {
 describe('LotPage generateMetadata', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://parcela.test';
   });
 
   it('returns lot-specific metadata when the lot exists', async () => {
@@ -58,6 +59,7 @@ describe('LotPage generateMetadata', () => {
 describe('LotPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://parcela.test';
   });
 
   it('calls notFound when the lot does not exist', async () => {
