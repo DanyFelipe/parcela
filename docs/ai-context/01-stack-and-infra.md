@@ -85,6 +85,9 @@ CLOUDFLARE_R2_BUCKET_NAME=
 NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_AUTH_TOKEN=                  # solo para source maps en build, nunca en cliente
 
+# Site URL (SEO / metadata)
+NEXT_PUBLIC_SITE_URL=               # URL pública del sitio, ej. "https://www.inmobiliaria-ejemplo.com". Usada para metadataBase, og:url, JSON-LD y sitemap.
+
 # Identidad del despliegue (para logs/analítica, no para lógica condicional de código)
 NEXT_PUBLIC_CLIENT_SLUG=            # ej. "inmobiliaria-los-robles" — solo identificación, no ramifica lógica
 ```
@@ -126,4 +129,4 @@ El SEO no se resuelve con una librería adicional — se logra usando correctame
 
 ---
 
-**Última actualización:** 2026-09-16 · **Versión:** 1.3
+**Última actualización:** 2026-09-30 · **Versión:** 1.4

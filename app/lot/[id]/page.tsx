@@ -6,7 +6,7 @@ import { ArrowLeft, Check, X } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { getLotById, type LotDetails } from '@/lib/showroom/lot-data';
 import { formatPrice, formatSurface } from '@/lib/showroom/lot-formatting';
-import { buildLotMetadata } from '@/lib/showroom/lot-metadata';
+import { buildLotJsonLd, buildLotMetadata } from '@/lib/showroom/lot-metadata';
 import { lotStatusConfig } from '@/lib/showroom/lot-status';
 import { cn } from '@/lib/utils';
 
@@ -20,11 +20,15 @@ const legalStatusLabels: Record<NonNullable<LotDetails['legal_status']>, string>
   not_titled: 'Sin escritura',
 };
 
+function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? '';
+}
+
 export async function generateMetadata({ params }: LotPageProps): Promise<Metadata> {
   const { id } = await params;
   const lot = await getLotById(id);
 
-  return buildLotMetadata(lot);
+  return buildLotMetadata(lot, { baseUrl: getSiteUrl(), lotUrl: `/lot/${id}` });
 }
 
 export default async function LotPage({ params }: LotPageProps) {
@@ -35,10 +39,16 @@ export default async function LotPage({ params }: LotPageProps) {
     notFound();
   }
 
+  const jsonLd = buildLotJsonLd(lot, getSiteUrl());
+
   const status = lotStatusConfig[lot.status];
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto max-w-6xl px-6 py-12">
         <Link
           href="/"
