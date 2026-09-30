@@ -1,5 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
-import { lotDetailSchema, type LotDetailSchema } from '@/lib/validations/lot.schema';
+import {
+  lotDetailSchema,
+  lotStatusSchema,
+  type LotDetailSchema,
+} from '@/lib/validations/lot.schema';
 
 /**
  * Shape público de un lote tal como se muestra en la ficha completa `/lot/[id]`.
@@ -31,4 +35,29 @@ export async function getLotById(id: string): Promise<LotDetails | null> {
   }
 
   return parsed.data;
+}
+
+/**
+ * Devuelve los IDs de los lotes "activos" para el sitemap: disponibles o reservados.
+ * Excluye los vendidos (`sold`) porque ya no son ofertas activas.
+ */
+export async function getActiveLotIds(): Promise<string[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.from('lots').select('id, status').neq('status', 'sold');
+
+  if (error || !data) {
+    console.error('Error loading active lot ids', { error });
+    return [];
+  }
+
+  return data
+    .filter((row): row is { id: string; status: LotDetailSchema['status'] } => {
+      return (
+        typeof row.id === 'string' &&
+        lotStatusSchema.safeParse(row.status).success &&
+        row.status !== 'sold'
+      );
+    })
+    .map((row) => row.id);
 }

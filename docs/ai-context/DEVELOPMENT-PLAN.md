@@ -106,7 +106,7 @@ Objetivo: los dos niveles de información del lote, con la página completa cump
 | PARC-302 | `app/lot/[id]/page.tsx`: Server Component con datos completos del lote                            | 🔴        | 5          | Done |
 | PARC-303 | `generateMetadata` dinámico (title, description) por lote                                         | 🔴        | 2          | Done |
 | PARC-304 | Open Graph (`og:image`) + JSON-LD (schema.org) por lote                                           | 🟡        | 3          | Done |
-| PARC-305 | `app/sitemap.ts` dinámico generado desde `lots`                                                   | 🟡        | 2          |
+| PARC-305 | `app/sitemap.ts` dinámico generado desde `lots`                                                   | 🟡        | 2          | Done |
 | PARC-306 | Sección de plano técnico + servicios + estado legal en la ficha completa                          | 🔴        | 3          |
 | PARC-307 | Botón "volver" (navegación normal, sin animación — ver 02 §8.2)                                   | 🟢        | 1          |
 | PARC-308 | Test E2E: hotspot → preview → "ver ficha completa" → página indexable carga con metadata correcta | 🟡        | 3          |
