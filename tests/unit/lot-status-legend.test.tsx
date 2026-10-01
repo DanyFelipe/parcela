@@ -27,9 +27,9 @@ describe('LotStatusLegend', () => {
   it('applies the correct color class for each status', () => {
     const { container } = render(<LotStatusLegend statuses={['available', 'reserved', 'sold']} />);
 
-    expect(container.querySelector('.bg-emerald-500')).toBeInTheDocument();
-    expect(container.querySelector('.bg-amber-500')).toBeInTheDocument();
-    expect(container.querySelector('.bg-rose-500')).toBeInTheDocument();
+    expect(container.querySelector('.bg-status-available')).toBeInTheDocument();
+    expect(container.querySelector('.bg-status-reserved')).toBeInTheDocument();
+    expect(container.querySelector('.bg-status-sold')).toBeInTheDocument();
   });
 
   it('fades out when fadingOut is true', () => {

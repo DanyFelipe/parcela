@@ -69,7 +69,7 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white ${lotStatusConfig[lot.status].dotClass}`}
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${lotStatusConfig[lot.status].badgeClass}`}
               >
                 {lotStatusConfig[lot.status].label}
               </span>

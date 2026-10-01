@@ -39,7 +39,7 @@ export default async function LotPage({ params }: LotPageProps) {
   const status = lotStatusConfig[lot.status];
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -54,8 +54,8 @@ export default async function LotPage({ params }: LotPageProps) {
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{lot.name}</h1>
             <span
               className={cn(
-                'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium text-white',
-                status.dotClass
+                'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+                status.badgeClass
               )}
             >
               {status.label}

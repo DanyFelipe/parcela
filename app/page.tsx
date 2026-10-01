@@ -15,7 +15,7 @@ export default async function Home() {
 
   if (views.length === 0) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-6 text-white">
+      <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
         <p role="status">No hay vistas disponibles para mostrar.</p>
       </main>
     );

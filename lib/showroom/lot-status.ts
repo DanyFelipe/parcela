@@ -2,22 +2,25 @@ import type { LotStatus } from '@/lib/showroom/showroom-data';
 
 export const lotStatusConfig: Record<
   LotStatus,
-  { label: string; dotClass: string; shadowClass: string }
+  { label: string; dotClass: string; badgeClass: string; shadowClass: string }
 > = {
   available: {
     label: 'Disponible',
-    dotClass: 'bg-emerald-500',
-    shadowClass: 'shadow-emerald-500/50',
+    dotClass: 'bg-status-available',
+    badgeClass: 'bg-status-available text-status-available-foreground',
+    shadowClass: 'shadow-status-available/50',
   },
   reserved: {
     label: 'Reservado',
-    dotClass: 'bg-amber-500',
-    shadowClass: 'shadow-amber-500/50',
+    dotClass: 'bg-status-reserved',
+    badgeClass: 'bg-status-reserved text-status-reserved-foreground',
+    shadowClass: 'shadow-status-reserved/50',
   },
   sold: {
     label: 'Vendido',
-    dotClass: 'bg-rose-500',
-    shadowClass: 'shadow-rose-500/50',
+    dotClass: 'bg-status-sold',
+    badgeClass: 'bg-status-sold text-status-sold-foreground',
+    shadowClass: 'shadow-status-sold/50',
   },
 };
 
@@ -25,7 +28,7 @@ export function statusColorClass(status: LotStatus): string {
   const config = lotStatusConfig[status];
 
   if (!config) {
-    return 'bg-zinc-400 shadow-zinc-400/50';
+    return 'bg-muted-foreground shadow-muted-foreground/50';
   }
 
   return `${config.dotClass} ${config.shadowClass}`;

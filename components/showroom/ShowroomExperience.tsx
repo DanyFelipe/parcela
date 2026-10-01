@@ -142,7 +142,7 @@ export function ShowroomExperience({
   const showPreviewCard = currentView === VIEW_WITH_LOT_HOTSPOTS && selectedLot !== null;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="absolute inset-0">
         {hasGridToggle ? (
           <>
