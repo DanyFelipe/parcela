@@ -125,7 +125,7 @@ Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya ide
 | PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          | Done |
 | PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          | Done |
 | PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          |
-| PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          |
+| PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          | Done |
 | PARC-406 | Accesibilidad: `aria-label`, navegación por teclado en hotspots y controles       | 🟡        | 3          |
 
 **Criterio de salida del sprint:** experiencia inmersiva completa según lo diseñado, con las capas de accesibilidad y performance ya contempladas en los documentos base.
