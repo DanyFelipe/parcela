@@ -121,9 +121,9 @@ Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya ide
 
 | Ticket   | Título                                                                            | Prioridad | Estimación |
 | -------- | --------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-401 | Integración de Photo Sphere Viewer (`Viewer360.tsx`)                              | 🟡        | 5          |
-| PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          |
-| PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          |
+| PARC-401 | Integración de Photo Sphere Viewer (`Viewer360.tsx`)                              | 🟡        | 5          | Done |
+| PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          | Done |
+| PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          | Done |
 | PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          |
 | PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          |
 | PARC-406 | Accesibilidad: `aria-label`, navegación por teclado en hotspots y controles       | 🟡        | 3          |

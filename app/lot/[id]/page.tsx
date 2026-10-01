@@ -5,6 +5,7 @@ import { BackToShowroomLink } from '@/components/showroom/BackToShowroomLink';
 import { LotServices } from '@/components/showroom/LotServices';
 import { LotSpecs } from '@/components/showroom/LotSpecs';
 import { LotTechnicalPlan } from '@/components/showroom/LotTechnicalPlan';
+import { Viewer360 } from '@/components/showroom/Viewer360';
 import { getLotById } from '@/lib/showroom/lot-data';
 import { formatPrice, formatSurface } from '@/lib/showroom/lot-formatting';
 import { buildLotJsonLd, buildLotMetadata } from '@/lib/showroom/lot-metadata';
@@ -103,7 +104,7 @@ export default async function LotPage({ params }: LotPageProps) {
         {lot.image_360_url && (
           <section className="mt-10">
             <h2 className="mb-3 text-sm font-medium text-white/60">Recorrido 360°</h2>
-            <p className="text-white/80">Este lote incluye recorrido visual de 360°.</p>
+            <Viewer360 imageUrl={lot.image_360_url} />
           </section>
         )}
       </div>
