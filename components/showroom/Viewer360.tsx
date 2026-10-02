@@ -87,14 +87,14 @@ export function Viewer360({ imageUrl }: Viewer360Props) {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex flex-col bg-black"
+          className="fixed inset-0 z-50 flex flex-col bg-background"
           role="dialog"
           aria-modal="true"
           aria-label="Recorrido 360° del lote"
           data-testid="viewer-360-modal"
         >
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <span className="text-sm font-medium text-white">Recorrido 360°</span>
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <span className="text-sm font-medium text-foreground">Recorrido 360°</span>
             <Button
               type="button"
               variant="ghost"
@@ -103,13 +103,13 @@ export function Viewer360({ imageUrl }: Viewer360Props) {
               aria-label="Cerrar recorrido 360°"
               data-testid="viewer-360-close"
             >
-              <X className="size-5 text-white" />
+              <X className="size-5 text-foreground" />
             </Button>
           </div>
 
           <div className="relative flex-1 overflow-hidden">
             {isLoading && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/80 text-white">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-background/85 text-foreground">
                 <Loader2 className="size-8 animate-spin" aria-hidden="true" />
                 <span className="text-sm">Cargando recorrido 360°...</span>
               </div>

@@ -49,7 +49,7 @@ pnpm exec tsc --noEmit                    # no hay script de typecheck dedicado
 - Todo identificador de código en inglés; contenido de negocio/UI en español.
 - Todo acceso a storage pasa por la interfaz `StorageProvider` (`lib/storage/`) — nunca el SDK del proveedor directo.
 - Toda escritura a Supabase pasa por una Server Action con validación Zod — nunca desde un componente cliente. La `service_role key` vive solo en el servidor.
-- RLS nunca se desactiva. El tema visual es fijo (sin modo oscuro, sin selector).
+- RLS nunca se desactiva. El tema visual es fijo (un único tema claro, sin modo oscuro, sin selector).
 - Para cualquier tarea de diseño visual (UI, colores, tipografía, animación) se usan **solo 2 fuentes**: `shadcn/ui` estándar + la skill `frontend-design`. No existe un design system propio en el repo — ver `docs/ai-context/00-INDEX.md`.
 - Auth existe solo para `/admin`; el visitante del showroom nunca inicia sesión ni tiene cuenta. El `matcher` del middleware no se amplía fuera de `/admin/:path*`.
 - Sin lógica condicional por cliente (`if (cliente === 'x')`) en la plantilla — las diferencias entre clientes viven en datos y env vars.

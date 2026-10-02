@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@testing-library/jest-dom/vitest';
@@ -75,6 +75,7 @@ describe('ShowroomExperience hotspot rendering', () => {
       currentView: 'front',
       selectedLotId: null,
       transitionInProgress: false,
+      frontRequest: 0,
     });
     HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
     HTMLMediaElement.prototype.load = vi.fn();
@@ -344,6 +345,61 @@ describe('ShowroomExperience hotspot rendering', () => {
     });
     expect(screen.queryByRole('heading', { name: 'Lote A-01' })).not.toBeInTheDocument();
   });
+
+  it('closes the preview card when the same lot hotspot is clicked again', async () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hotspot-preview-card')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('hotspot-preview-card')).not.toBeInTheDocument();
+    });
+  });
+
+  it('returns to the front view instantly when the back button requests it', async () => {
+    useShowroomStore.setState({ currentView: 'top', transitionInProgress: false, frontRequest: 0 });
+
+    render(
+      <ShowroomExperience
+        views={baseViews}
+        transitionUrls={{}}
+        viewAltText={viewAltText}
+        lots={baseLots}
+        lotHotspots={baseLotHotspots}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lot-hotspot'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hotspot-preview-card')).toBeInTheDocument();
+    });
+
+    act(() => {
+      useShowroomStore.getState().requestFront();
+    });
+
+    await waitFor(() => {
+      expect(useShowroomStore.getState().currentView).toBe('front');
+    });
+    expect(screen.queryByTestId('hotspot-preview-card')).not.toBeInTheDocument();
+  });
 });
 
 describe('ShowroomExperience feature hotspot rendering', () => {
@@ -501,8 +557,9 @@ describe('ShowroomExperience feature hotspot rendering', () => {
       />
     );
 
-    const scrim = container.querySelector('.bg-black\\/20');
+    const scrim = screen.getByTestId('showroom-scrim');
     expect(scrim).toHaveClass('pointer-events-none');
+    expect(scrim).not.toHaveClass('hidden');
 
     const uiSection = container.querySelector('section');
     expect(uiSection).toHaveClass('pointer-events-none');
@@ -611,101 +668,5 @@ describe('ShowroomExperience grid toggle', () => {
     fireEvent.click(screen.getByTestId('grid-toggle'));
 
     expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
-  });
-});
-
-describe('ShowroomExperience lot status legend', () => {
-  beforeEach(() => {
-    useShowroomStore.setState({
-      currentView: 'top',
-      selectedLotId: null,
-      transitionInProgress: false,
-    });
-    HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
-    HTMLMediaElement.prototype.load = vi.fn();
-  });
-
-  afterEach(() => {
-    document.body.innerHTML = '';
-  });
-
-  it('renders the legend in the top view with the statuses of visible lots', () => {
-    render(
-      <ShowroomExperience
-        views={baseViews}
-        transitionUrls={{}}
-        viewAltText={viewAltText}
-        lots={baseLots}
-        lotHotspots={baseLotHotspots}
-      />
-    );
-
-    expect(screen.getByTestId('lot-status-legend')).toBeInTheDocument();
-    expect(screen.getByText('Disponible')).toBeInTheDocument();
-  });
-
-  it('does not render the legend in the front view', () => {
-    useShowroomStore.setState({ currentView: 'front', transitionInProgress: false });
-
-    render(
-      <ShowroomExperience
-        views={baseViews}
-        transitionUrls={{}}
-        viewAltText={viewAltText}
-        lots={baseLots}
-        lotHotspots={baseLotHotspots}
-      />
-    );
-
-    expect(screen.queryByTestId('lot-status-legend')).not.toBeInTheDocument();
-  });
-
-  it('fades out the legend when a transition starts', () => {
-    render(
-      <ShowroomExperience
-        views={baseViews}
-        transitionUrls={{ 'top->front': 'https://example.com/top-to-front.mp4' }}
-        viewAltText={viewAltText}
-        lots={baseLots}
-        lotHotspots={baseLotHotspots}
-      />
-    );
-
-    expect(screen.getByTestId('lot-status-legend')).toHaveClass('opacity-100');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Volver a vista frontal' }));
-
-    expect(screen.getByTestId('lot-status-legend')).toHaveClass('opacity-0');
-  });
-
-  it('only shows statuses that are present in visible lots', () => {
-    const soldLot = {
-      id: 'lot-2',
-      name: 'Lote A-02',
-      price: 80000,
-      status: 'sold' as const,
-      surface_area: 450,
-    };
-    const soldHotspot = {
-      id: 'hs-2',
-      lot_id: 'lot-2',
-      view_id: 'top' as const,
-      hotspot_x: 60,
-      hotspot_y: 60,
-    };
-
-    render(
-      <ShowroomExperience
-        views={baseViews}
-        transitionUrls={{}}
-        viewAltText={viewAltText}
-        lots={[baseLots[0], soldLot]}
-        lotHotspots={[baseLotHotspots[0], soldHotspot]}
-      />
-    );
-
-    expect(screen.getByText('Disponible')).toBeInTheDocument();
-    expect(screen.getByText('Vendido')).toBeInTheDocument();
-    expect(screen.queryByText('Reservado')).not.toBeInTheDocument();
   });
 });

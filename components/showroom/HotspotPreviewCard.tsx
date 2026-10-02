@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -18,6 +18,8 @@ interface HotspotPreviewCardProps {
 }
 
 export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   useEffect(() => {
     if (!lot) {
       return;
@@ -35,18 +37,18 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center p-0 sm:items-end sm:p-6"
+      className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center p-0 sm:inset-auto sm:bottom-auto sm:left-6 sm:right-auto sm:top-20 sm:items-start sm:justify-start"
       data-testid="hotspot-preview-container"
     >
       <AnimatePresence mode="wait">
         {lot && (
           <motion.div
             key={lot.id}
-            className="glass-panel pointer-events-auto relative max-h-[min(70svh,34rem)] w-full max-w-none overflow-y-auto rounded-b-none rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-foreground sm:max-h-none sm:max-w-sm sm:overflow-visible sm:rounded-2xl sm:pb-5"
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="glass-panel pointer-events-auto relative max-h-[min(70svh,34rem)] w-full max-w-none overflow-y-auto rounded-b-none rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-foreground sm:max-h-[calc(100svh-7rem)] sm:w-80 sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl sm:pb-5"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
             role="dialog"
             aria-modal="true"
             aria-labelledby={`lot-preview-title-${lot.id}`}
@@ -63,7 +65,10 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
               <X size={18} />
             </Button>
 
-            <h2 id={`lot-preview-title-${lot.id}`} className="pr-8 text-lg font-semibold">
+            <h2
+              id={`lot-preview-title-${lot.id}`}
+              className="pr-8 text-lg font-semibold leading-tight"
+            >
               {lot.name}
             </h2>
 

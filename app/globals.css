@@ -2,6 +2,9 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+/* El tema de shadcn/ui trae clases `dark:`; se dejan inertes declarando el
+   variant contra una clase `.dark` que nunca se aplica. Sin esto, Tailwind v4
+   las ataría a `prefers-color-scheme` y aparecerían restos oscuros. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -27,7 +30,6 @@
   --color-ring: var(--ring);
 
   /* Showroom-specific semantic tokens */
-  --color-overlay: var(--overlay);
   --color-panel: var(--panel);
   --color-panel-border: var(--panel-border);
   --color-status-available: var(--status-available);
@@ -36,32 +38,10 @@
   --color-status-reserved-foreground: var(--status-reserved-foreground);
   --color-status-sold: var(--status-sold);
   --color-status-sold-foreground: var(--status-sold-foreground);
+  --color-status-dot-ring: var(--status-dot-ring);
 
-  /* Typography */
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-
-  --text-display: 2.5rem;
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.02em;
-  --text-title: 1.875rem;
-  --text-title--line-height: 1.15;
-  --text-title--letter-spacing: -0.01em;
-  --text-subtitle: 1.125rem;
-  --text-subtitle--line-height: 1.4;
-  --text-body: 1rem;
-  --text-body--line-height: 1.6;
-  --text-small: 0.875rem;
-  --text-small--line-height: 1.5;
-  --text-label: 0.75rem;
-  --text-label--line-height: 1rem;
-  --text-label--letter-spacing: 0.04em;
-
-  /* Spacing */
-  --spacing-section: 3rem;
-  --spacing-panel: 1.5rem;
-  --spacing-gap: 1rem;
+  /* Typography — una única familia (Figtree) para todo el proyecto */
+  --font-sans: var(--font-figtree);
 
   /* Radius */
   --radius-sm: calc(var(--radius) * 0.6);
@@ -73,7 +53,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* Shadows */
-  --shadow-panel: 0 10px 30px -10px oklch(0.15 0.004 60 / 0.5);
+  --shadow-panel: 0 12px 32px -14px rgb(27 28 26 / 0.28);
+  --shadow-hotspot: 0 1px 3px rgb(27 28 26 / 0.35);
 
   /* shadcn sidebar/chart tokens (kept for component compatibility) */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -92,66 +73,71 @@
 }
 
 :root {
-  /* Base surfaces — tema fijo oscuro, inspirado en tierra/madera/piedra */
-  --background: oklch(0.15 0.004 60);
-  --foreground: oklch(0.95 0.005 90);
+  /* Tema claro "Hormigón y roble": hueso frío + grafito + roble */
+  color-scheme: light;
+
+  /* Base surfaces */
+  --background: #f7f6f3;
+  --foreground: #1b1c1a;
 
   /* Panels */
-  --card: oklch(0.18 0.005 70);
-  --card-foreground: oklch(0.95 0.005 90);
-  --popover: oklch(0.2 0.006 80);
-  --popover-foreground: oklch(0.95 0.005 90);
+  --card: #ffffff;
+  --card-foreground: #1b1c1a;
+  --popover: #ffffff;
+  --popover-foreground: #1b1c1a;
 
   /* Actions */
-  --primary: oklch(0.73 0.06 135);
-  --primary-foreground: oklch(0.15 0.004 60);
-  --secondary: oklch(0.26 0.008 80);
-  --secondary-foreground: oklch(0.95 0.005 90);
-  --muted: oklch(0.22 0.006 80);
-  --muted-foreground: oklch(0.7 0.005 90);
-  --accent: oklch(0.79 0.035 90);
-  --accent-foreground: oklch(0.15 0.004 60);
+  --primary: #1b1c1a;
+  --primary-foreground: #f7f6f3;
+  --secondary: #ece9e3;
+  --secondary-foreground: #1b1c1a;
+  --muted: #ece9e3;
+  --muted-foreground: #6f6d66;
+  --accent: #8f6535;
+  --accent-foreground: #fdfbf7;
 
   /* System */
-  --destructive: oklch(0.57 0.15 25);
-  --destructive-foreground: oklch(0.98 0.005 90);
-  --border: oklch(0.95 0.005 90 / 0.12);
-  --input: oklch(0.95 0.005 90 / 0.15);
-  --ring: oklch(0.73 0.06 135);
+  --destructive: #a2433c;
+  --destructive-foreground: #fdfbf7;
+  --border: rgb(27 28 26 / 0.12);
+  --input: rgb(27 28 26 / 0.08);
+  --ring: #8f6535;
 
   /* Geometry */
   --radius: 0.75rem;
 
   /* Showroom-specific */
-  --overlay: oklch(0.15 0.004 60);
-  --panel: oklch(0.21 0.008 80);
-  --panel-border: oklch(0.95 0.005 90 / 0.16);
+  --panel: rgb(255 255 255 / 0.9);
+  --panel-border: rgb(27 28 26 / 0.1);
+  --status-dot-ring: rgb(255 255 255 / 0.9);
 
-  /* Status — armonizados con la paleta, con foreground oscuro para AA */
-  --status-available: oklch(0.65 0.13 150);
-  --status-available-foreground: oklch(0.15 0.004 60);
-  --status-reserved: oklch(0.75 0.12 85);
-  --status-reserved-foreground: oklch(0.15 0.004 60);
-  --status-sold: oklch(0.6 0.14 25);
-  --status-sold-foreground: oklch(0.98 0.005 90);
+  /* Status — con contraste AA sobre texto blanco */
+  --status-available: #3d6f52;
+  --status-available-foreground: #ffffff;
+  --status-reserved: #8a6416;
+  --status-reserved-foreground: #ffffff;
+  --status-sold: #a2433c;
+  --status-sold-foreground: #ffffff;
 
   /* shadcn sidebar/chart defaults */
-  --sidebar: oklch(0.18 0.005 70);
-  --sidebar-foreground: oklch(0.95 0.005 90);
-  --sidebar-primary: oklch(0.73 0.06 135);
-  --sidebar-primary-foreground: oklch(0.15 0.004 60);
-  --sidebar-accent: oklch(0.26 0.008 80);
-  --sidebar-accent-foreground: oklch(0.95 0.005 90);
-  --sidebar-border: oklch(0.95 0.005 90 / 0.12);
-  --sidebar-ring: oklch(0.73 0.06 135);
-  --chart-1: oklch(0.65 0.13 150);
-  --chart-2: oklch(0.75 0.12 85);
-  --chart-3: oklch(0.6 0.14 25);
-  --chart-4: oklch(0.55 0.16 25);
-  --chart-5: oklch(0.45 0.18 25);
+  --sidebar: #f7f6f3;
+  --sidebar-foreground: #1b1c1a;
+  --sidebar-primary: #1b1c1a;
+  --sidebar-primary-foreground: #f7f6f3;
+  --sidebar-accent: #ece9e3;
+  --sidebar-accent-foreground: #1b1c1a;
+  --sidebar-border: rgb(27 28 26 / 0.12);
+  --sidebar-ring: #8f6535;
+  --chart-1: #3d6f52;
+  --chart-2: #8a6416;
+  --chart-3: #a2433c;
+  --chart-4: #8f6535;
+  --chart-5: #1b1c1a;
 }
 
 @layer components {
+  /* Panel de vidrio reutilizable con mejora progresiva: si el navegador no
+     soporta `backdrop-filter`, queda un fondo opaco legible en su lugar. */
   .glass-panel {
     border: 1px solid var(--panel-border);
     background-color: var(--panel);
@@ -160,9 +146,9 @@
 
   @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
     .glass-panel {
-      background-color: color-mix(in oklab, var(--panel) 88%, transparent);
-      -webkit-backdrop-filter: blur(18px) saturate(135%);
-      backdrop-filter: blur(18px) saturate(135%);
+      background-color: color-mix(in oklab, var(--panel) 90%, transparent);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      backdrop-filter: blur(20px) saturate(120%);
     }
   }
 }
@@ -171,16 +157,29 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
   /* Tailwind v4 quitó el cursor pointer por defecto en botones; se restaura
      para todo elemento accionable (hotspots, controles, botones de shadcn/ui). */
   button:not(:disabled),
   [role='button']:not(:disabled) {
     cursor: pointer;
+  }
+  /* Respeta `prefers-reduced-motion` en toda la UI. Se usa `!important`
+     porque las utilidades de Tailwind (`duration-*`) tienen prioridad de
+     capa sobre `base` y de otro modo no podrían anularse. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

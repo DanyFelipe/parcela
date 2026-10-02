@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Home, LayoutGrid, MapPin, X, type LucideIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const iconByName: Record<string, LucideIcon> = {
 };
 
 export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps) {
+  const prefersReducedMotion = useReducedMotion();
   const IconComponent = feature?.icon ? iconByName[feature.icon] : null;
 
   return (
@@ -31,17 +32,17 @@ export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps
       {feature && (
         <motion.div
           key={feature.id}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-0 sm:bottom-6 sm:p-6"
+          className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center p-0 sm:inset-auto sm:bottom-auto sm:left-6 sm:right-auto sm:top-20 sm:items-start sm:justify-start"
           role="dialog"
           aria-modal="true"
           aria-labelledby={`feature-title-${feature.id}`}
           data-testid="feature-info-popover"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 24 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.97 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
         >
-          <div className="glass-panel pointer-events-auto relative max-h-[min(70svh,34rem)] w-full max-w-none overflow-y-auto rounded-b-none rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-foreground sm:max-h-none sm:max-w-md sm:overflow-visible sm:rounded-2xl sm:pb-5">
+          <div className="glass-panel pointer-events-auto relative max-h-[min(70svh,34rem)] w-full max-w-none overflow-y-auto rounded-b-none rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-foreground sm:max-h-[calc(100svh-7rem)] sm:w-96 sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl sm:pb-5">
             <Button
               type="button"
               variant="ghost"

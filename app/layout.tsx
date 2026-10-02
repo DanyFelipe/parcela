@@ -1,19 +1,10 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Figtree } from 'next/font/google';
+import { Figtree } from 'next/font/google';
 import './globals.css';
+import { TopBar } from '@/components/showroom/TopBar';
 import { cn } from '@/lib/utils';
 
-const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+const figtree = Figtree({ subsets: ['latin'], variable: '--font-figtree', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL
@@ -25,18 +16,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        'h-full',
-        'antialiased',
-        geistSans.variable,
-        geistMono.variable,
-        'font-sans',
-        figtree.variable
-      )}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className={cn('h-full', 'antialiased', figtree.variable)}>
+      <body className="flex min-h-full flex-col">
+        <TopBar />
+        {children}
+      </body>
     </html>
   );
 }

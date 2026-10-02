@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 
 import { FeatureHotspotsLayer } from '@/components/showroom/FeatureHotspotsLayer';
@@ -13,14 +13,12 @@ import {
 import { GridToggle } from '@/components/showroom/GridToggle';
 import { HotspotPreviewCard } from '@/components/showroom/HotspotPreviewCard';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
-import { LotStatusLegend } from '@/components/showroom/LotStatusLegend';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
 import type {
   FeatureHotspotData,
   LotData,
   LotHotspotData,
-  LotStatus,
   ShowroomViewData,
 } from '@/lib/showroom/showroom-data';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
@@ -51,9 +49,27 @@ export function ShowroomExperience({
   const transitionInProgress = useShowroomStore((state) => state.transitionInProgress);
   const selectedLotId = useShowroomStore((state) => state.selectedLotId);
   const selectLot = useShowroomStore((state) => state.selectLot);
+  const setView = useShowroomStore((state) => state.setView);
+  const setTransitionInProgress = useShowroomStore((state) => state.setTransitionInProgress);
+  const frontRequest = useShowroomStore((state) => state.frontRequest);
   const [pendingTransition, setPendingTransition] = useState<ViewTransitionRequest | null>(null);
   const [activeFeatureInfo, setActiveFeatureInfo] = useState<FeatureHotspotInfo | null>(null);
   const [showGrid, setShowGrid] = useState(true);
+  const handledFrontRequest = useRef(frontRequest);
+
+  useEffect(() => {
+    if (frontRequest === handledFrontRequest.current) {
+      return;
+    }
+
+    handledFrontRequest.current = frontRequest;
+    setPendingTransition(null);
+    setActiveFeatureInfo(null);
+    selectLot(null);
+    setView('front');
+    setTransitionInProgress(false);
+  }, [frontRequest, selectLot, setTransitionInProgress, setView]);
+
   const currentViewData = views.find((view) => view.id === currentView) ?? views[0];
 
   if (!currentViewData) {
@@ -67,7 +83,7 @@ export function ShowroomExperience({
   }
 
   function handleHotspotClick(lotId: string): void {
-    selectLot(lotId);
+    selectLot(selectedLotId === lotId ? null : lotId);
   }
 
   function handleFeatureNavigate(targetViewId: ShowroomView): void {
@@ -132,13 +148,6 @@ export function ShowroomExperience({
     currentView === VIEW_WITH_LOT_HOTSPOTS && currentViewData.alt_image_url !== null;
 
   const lotById = new Map(lots.map((lot) => [lot.id, lot]));
-  const visibleLotStatuses = Array.from(
-    new Set(
-      topHotspots
-        .map((hotspot) => lotById.get(hotspot.lot_id)?.status)
-        .filter((status): status is LotStatus => status !== undefined)
-    )
-  );
   const selectedLot = selectedLotId ? (lotById.get(selectedLotId) ?? null) : null;
   const showPreviewCard = currentView === VIEW_WITH_LOT_HOTSPOTS && selectedLot !== null;
 
@@ -180,10 +189,6 @@ export function ShowroomExperience({
             />
           )}
 
-          {showLotHotspotsLayer && visibleLotStatuses.length > 0 && (
-            <LotStatusLegend statuses={visibleLotStatuses} fadingOut={hotspotsFadingOut} />
-          )}
-
           {showLotHotspotsLayer && (
             <LotHotspotsLayer
               lots={lots}
@@ -212,17 +217,21 @@ export function ShowroomExperience({
             </div>
           )}
 
-          <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/15 via-transparent to-transparent"
+            aria-hidden="true"
+            data-testid="showroom-scrim"
+          />
         </div>
       </div>
 
       <section className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-auto sm:bottom-8 sm:left-8 sm:gap-6 sm:p-0">
         <div className="glass-panel max-w-md rounded-2xl p-3 sm:p-5">
-          <p className="text-xs text-muted-foreground">Parcela</p>
-          <h1 className="mt-1 text-xl font-semibold leading-tight sm:mt-2 sm:text-3xl">
+          <p className="text-xs text-accent">Parcela</p>
+          <h1 className="mt-1 text-xl font-semibold leading-tight tracking-tight sm:mt-2 sm:text-3xl">
             Descubre tu próximo terreno
           </h1>
-          <p className="mt-1 text-sm text-foreground/85 sm:mt-2">
+          <p className="mt-1 text-sm text-foreground/75 sm:mt-2">
             Explora las vistas del proyecto y conoce cada espacio.
           </p>
         </div>

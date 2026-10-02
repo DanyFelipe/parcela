@@ -2,12 +2,15 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { useShowroomStore, type ShowroomState } from '@/lib/store/showroom.store';
 
-const initialState: Pick<ShowroomState, 'currentView' | 'selectedLotId' | 'transitionInProgress'> =
-  {
-    currentView: 'front',
-    selectedLotId: null,
-    transitionInProgress: false,
-  };
+const initialState: Pick<
+  ShowroomState,
+  'currentView' | 'selectedLotId' | 'transitionInProgress' | 'frontRequest'
+> = {
+  currentView: 'front',
+  selectedLotId: null,
+  transitionInProgress: false,
+  frontRequest: 0,
+};
 
 describe('useShowroomStore', () => {
   beforeEach(() => {
@@ -42,6 +45,15 @@ describe('useShowroomStore', () => {
 
     useShowroomStore.getState().setTransitionInProgress(false);
     expect(useShowroomStore.getState().transitionInProgress).toBe(false);
+  });
+
+  it('increments the front request counter', () => {
+    expect(useShowroomStore.getState().frontRequest).toBe(0);
+
+    useShowroomStore.getState().requestFront();
+    useShowroomStore.getState().requestFront();
+
+    expect(useShowroomStore.getState().frontRequest).toBe(2);
   });
 
   it('keeps state isolated between tests', () => {
