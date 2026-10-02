@@ -41,20 +41,20 @@ export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
-          <div className="pointer-events-auto relative w-full max-w-md rounded-lg bg-black/75 p-5 text-white shadow-lg backdrop-blur-sm">
+          <div className="glass-panel pointer-events-auto relative w-full max-w-md rounded-2xl p-5 text-foreground">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={onClose}
               aria-label="Cerrar información"
-              className="absolute right-2 top-2 text-white hover:bg-white/10"
+              className="absolute right-2 top-2 text-foreground hover:bg-foreground/10"
             >
               <X size={18} />
             </Button>
             <div className="flex items-start gap-3 pr-8">
               {IconComponent && (
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground/10">
                   <IconComponent size={16} aria-hidden />
                 </span>
               )}
@@ -66,7 +66,7 @@ export function FeatureInfoPopover({ feature, onClose }: FeatureInfoPopoverProps
                   {feature.title}
                 </h2>
                 {feature.description && (
-                  <p className="mt-2 text-sm text-white/80">{feature.description}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{feature.description}</p>
                 )}
               </div>
             </div>

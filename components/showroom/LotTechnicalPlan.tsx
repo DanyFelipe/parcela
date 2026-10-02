@@ -5,12 +5,14 @@ interface LotTechnicalPlanProps {
 
 export function LotTechnicalPlan({ imageUrl, lotName }: LotTechnicalPlanProps) {
   return (
-    <div>
-      <h2 className="mb-3 text-sm font-medium text-white/60">Plano técnico</h2>
-      <div className="overflow-hidden rounded-lg border border-white/10 bg-white/5">
+    <section className="glass-panel rounded-2xl p-5 sm:p-6" aria-labelledby="lot-plan-heading">
+      <h2 id="lot-plan-heading" className="mb-4 text-sm font-medium text-muted-foreground">
+        Plano técnico
+      </h2>
+      <div className="overflow-hidden rounded-xl border border-panel-border bg-background/80">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={imageUrl} alt={`Plano técnico de ${lotName}`} className="w-full object-contain" />
       </div>
-    </div>
+    </section>
   );
 }

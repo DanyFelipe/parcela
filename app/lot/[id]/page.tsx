@@ -95,9 +95,17 @@ export default async function LotPage({ params }: LotPageProps) {
         </section>
 
         {lot.description && (
-          <section className="mt-10">
-            <h2 className="mb-3 text-sm font-medium text-white/60">Descripción</h2>
-            <p className="max-w-3xl whitespace-pre-line text-white/80">{lot.description}</p>
+          <section
+            className="glass-panel mt-10 rounded-2xl p-5 sm:p-6"
+            aria-labelledby="lot-description-heading"
+          >
+            <h2
+              id="lot-description-heading"
+              className="mb-3 text-sm font-medium text-muted-foreground"
+            >
+              Descripción
+            </h2>
+            <p className="max-w-3xl whitespace-pre-line text-foreground/85">{lot.description}</p>
           </section>
         )}
 

@@ -21,14 +21,16 @@ describe('LotServices', () => {
   it('marks active services as enabled', () => {
     render(<LotServices water electricity sewage={false} />);
 
-    expect(screen.getByText('Agua')).toHaveClass('text-white');
-    expect(screen.getByText('Electricidad')).toHaveClass('text-white');
-    expect(screen.getByText('Cloacas')).toHaveClass('text-white/50');
+    expect(screen.getByText('Agua')).toHaveClass('text-foreground');
+    expect(screen.getByText('Electricidad')).toHaveClass('text-foreground');
+    expect(screen.getByText('Cloacas')).toHaveClass('text-muted-foreground');
   });
 
   it('renders the section heading', () => {
     render(<LotServices water={false} electricity={false} sewage={false} />);
 
-    expect(screen.getByRole('heading', { name: 'Servicios disponibles' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Servicios disponibles' })).toHaveClass(
+      'glass-panel'
+    );
   });
 });

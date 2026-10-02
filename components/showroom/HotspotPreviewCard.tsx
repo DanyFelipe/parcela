@@ -42,7 +42,7 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
         {lot && (
           <motion.div
             key={lot.id}
-            className="pointer-events-auto relative w-full max-w-sm rounded-lg bg-black/75 p-5 text-white shadow-lg backdrop-blur-sm"
+            className="glass-panel pointer-events-auto relative w-full max-w-sm rounded-2xl p-5 text-foreground"
             initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
@@ -58,7 +58,7 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
               size="icon"
               onClick={onClose}
               aria-label="Cerrar vista previa"
-              className="absolute right-2 top-2 text-white hover:bg-white/10"
+              className="absolute right-2 top-2 text-foreground hover:bg-foreground/10"
             >
               <X size={18} />
             </Button>
@@ -76,8 +76,8 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
             </div>
 
             <div className="mt-4 grid gap-2 text-sm">
-              <p className="text-white/90">{formatPrice(lot.price)}</p>
-              <p className="text-white/80">{formatSurface(lot.surface_area)}</p>
+              <p className="text-foreground">{formatPrice(lot.price)}</p>
+              <p className="text-muted-foreground">{formatSurface(lot.surface_area)}</p>
             </div>
 
             <div className="mt-5">
@@ -85,7 +85,7 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
                 href={`/lot/${lot.id}`}
                 className={cn(
                   buttonVariants({ variant: 'default' }),
-                  'w-full bg-white text-zinc-900 hover:bg-white/90'
+                  'w-full bg-primary text-primary-foreground hover:bg-primary/90'
                 )}
               >
                 Ver ficha completa

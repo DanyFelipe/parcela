@@ -15,6 +15,7 @@ describe('LotTechnicalPlan', () => {
 
     const image = screen.getByRole('img', { name: 'Plano técnico de Lote A-01' });
     expect(image).toHaveAttribute('src', 'https://placehold.co/plan.webp');
+    expect(screen.getByRole('region', { name: 'Plano técnico' })).toHaveClass('glass-panel');
   });
 
   it('renders the section heading', () => {
