@@ -79,9 +79,9 @@ describe('Hotspot', () => {
   });
 
   it.each([
-    { status: 'available' as const, expectedColor: 'bg-emerald-500' },
-    { status: 'reserved' as const, expectedColor: 'bg-amber-500' },
-    { status: 'sold' as const, expectedColor: 'bg-rose-500' },
+    { status: 'available' as const, expectedColor: 'bg-status-available' },
+    { status: 'reserved' as const, expectedColor: 'bg-status-reserved' },
+    { status: 'sold' as const, expectedColor: 'bg-status-sold' },
   ])('applies a color class for status "$status"', ({ status, expectedColor }) => {
     const lot = { ...baseLot, status };
     const { container } = render(<Hotspot lot={lot} hotspot={baseHotspot} onClick={onClick} />);
