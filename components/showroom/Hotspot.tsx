@@ -20,7 +20,7 @@ export function Hotspot({ lot, hotspot, onClick }: HotspotProps) {
     <button
       type="button"
       onClick={handleClick}
-      className="group absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
+      className="group absolute -translate-x-1/2 -translate-y-1/2 before:absolute before:-inset-3 before:content-[''] focus:outline-none"
       style={{
         left: `${hotspot.hotspot_x}%`,
         top: `${hotspot.hotspot_y}%`,
@@ -31,9 +31,9 @@ export function Hotspot({ lot, hotspot, onClick }: HotspotProps) {
       data-lot-status={lot.status}
     >
       <span
-        className={`block size-3 rounded-full shadow-[0_0_0_2px_rgba(0,0,0,0.5)] ring-2 ring-white/80 transition-transform duration-150 group-hover:scale-125 group-focus-visible:scale-125 ${statusColorClass(lot.status)}`}
+        className={`block size-2.5 rounded-full shadow-hotspot ring-2 ring-status-dot-ring transition-transform duration-150 group-hover:scale-125 group-focus-visible:scale-125 ${statusColorClass(lot.status)}`}
       />
-      <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-2 py-0.5 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+      <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground/90 px-2 py-1 text-xs font-medium text-background opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
         {lot.name}
       </span>
     </button>

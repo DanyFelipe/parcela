@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { BackToShowroomLink } from '@/components/showroom/BackToShowroomLink';
 import { LotServices } from '@/components/showroom/LotServices';
 import { LotSpecs } from '@/components/showroom/LotSpecs';
 import { LotTechnicalPlan } from '@/components/showroom/LotTechnicalPlan';
@@ -44,11 +43,7 @@ export default async function LotPage({ params }: LotPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-12">
-        <div className="mb-5 sm:mb-6">
-          <BackToShowroomLink />
-        </div>
-
+      <div className="mx-auto max-w-6xl px-4 pb-6 pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pb-8 sm:pt-[calc(env(safe-area-inset-top)+6rem)] lg:pb-12">
         <header className="mb-6 sm:mb-10">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-4xl">{lot.name}</h1>
@@ -111,7 +106,7 @@ export default async function LotPage({ params }: LotPageProps) {
 
         {lot.image_360_url && (
           <section className="mt-6 sm:mt-10">
-            <h2 className="mb-3 text-sm font-medium text-white/60">Recorrido 360°</h2>
+            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Recorrido 360°</h2>
             <Viewer360 imageUrl={lot.image_360_url} />
           </section>
         )}

@@ -38,6 +38,7 @@
 
 /components
   /showroom
+    /TopBar.tsx                  → Barra persistente (volver + menú) en toda la app
     /TransitionVideoPlayer.tsx   → Reproductor de video para transiciones entre vistas (ver sección 6)
     /Hotspot.tsx                 → Punto interactivo de un lote (exclusivo de la vista top, ver sección 7.1)
     /HotspotPreviewCard.tsx      → Modal rápido con datos básicos al hacer click en un hotspot de lote
@@ -518,11 +519,13 @@ Vista general — "front" (con feature hotspots: acceso, amenidad, caseta de ven
   → click en hotspot de lote (solo disponible en "top") → se abre HotspotPreviewCard (fade-in de UI, sin video, sin cambio de render de fondo)
       → click en "Ver ficha completa" → navegación real a /lot/[id] (página indexable, con plano técnico y datos ampliados)
           → si el lote tiene image_360_url → opción "Ver en 360°" abre Viewer360 bajo demanda
-          → botón "volver" → navegación normal de Next.js de regreso al showroom
+          → botón "volver" de la barra persistente → regresa al showroom; si la vista activa no era "front", cambia a "front" de forma instantánea (ver excepción abajo)
       → cerrar el preview sin navegar → fade-out del modal, el render de fondo permanece igual
 ```
 
 **Regla:** no existe el concepto de "reversa" en ningún punto de este flujo — cada cambio de vista siempre reproduce un clip de video hacia adelante, específico para ese sentido exacto. Si una tarea futura pidiera "un botón para deshacer/volver a la vista anterior con animación", la respuesta correcta es reproducir el clip correspondiente al sentido inverso ya existente en `view_transitions` (ej. `rear→front`), nunca intentar reproducir `front→rear` al revés.
+
+**Excepción aprobada — botón "volver" de la barra persistente (`TopBar`):** este botón no reproduce ningún clip. Como `front` es el punto de inicio y fin de la experiencia, dentro del showroom lleva siempre a `front` de forma instantánea (`requestFront` en el store), limpiando preview/popover y cualquier transición en curso. Fuera del showroom (ficha de lote) usa la navegación normal del historial con fallback a `/`. La regla de "no reversa" sigue intacta para los controles de vista y los hotspots; esta es la única excepción y no debe replicarse en otros puntos del flujo.
 
 ## 11. Estrategia responsive (regla estricta — leer antes de tocar cualquier layout)
 
@@ -556,4 +559,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-09-27 · **Versión:** 3.4
+**Última actualización:** 2026-10-02 · **Versión:** 3.6

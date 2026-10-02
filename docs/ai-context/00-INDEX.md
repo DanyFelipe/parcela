@@ -31,7 +31,13 @@ Siempre que se complete un ticket, commit o push, el agente entrega en el chat �
 
 **Regla:** si una tarea de UI no se resuelve con shadcn/ui + la skill, es una ambigüedad — **preguntar antes de asumir**, no inventar un sistema de estilos paralelo.
 
-**Decisión de producto que se conserva** (antes vivía en `05-design-system.md`, sección 2): el tema visual es **fijo** — un solo tema, sin modo oscuro ni selector de tema. Ver también `AGENTS.md`, reglas no negociables.
+**Decisión de producto (actualizada en el rediseño "Hormigón y roble"):** el tema visual es **fijo** — un único tema **claro**, sin modo oscuro ni selector de tema. Ver también `AGENTS.md`, reglas no negociables.
+
+Paleta y tipografía del tema (tokens reales en `app/globals.css`):
+
+- **Hormigón y roble** — base hueso frío `#f7f6f3`, grafito `#1b1c1a`, hormigón `#ece9e3`, roble `#8f6535` como único acento, y estados `#3d6f52` / `#8a6416` / `#a2433c` con texto blanco (AA).
+- **Tipografía** — `Figtree` es la única familia del proyecto (UI, cuerpo y títulos), aplicada vía `--font-sans`. No hay serif ni fuente secundaria.
+- El `@custom-variant dark` se conserva para neutralizar las clases `dark:` de shadcn/ui: solo se activan dentro de `.dark`, que nunca existe, así que no hay modo oscuro.
 
 **Tareas que cruzan dominios** (la mayoría de las tareas reales) requieren cargar más de un documento. Ejemplos:
 
@@ -55,4 +61,4 @@ Cualquier cambio a estos documentos que altere una decisión ya tomada (no una c
 
 ---
 
-**Última actualización:** 2026-09-26 · **Versión:** 1.4
+**Última actualización:** 2026-10-02 · **Versión:** 1.5
