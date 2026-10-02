@@ -29,6 +29,9 @@ describe('FeatureInfoPopover', () => {
     render(<FeatureInfoPopover feature={baseFeature} onClose={onClose} />);
 
     expect(screen.getByTestId('feature-info-popover')).toBeInTheDocument();
+    const panel = screen.getByTestId('feature-info-popover').querySelector('.glass-panel');
+    expect(panel).toBeInTheDocument();
+    expect(panel).toHaveClass('rounded-t-2xl', 'max-h-[min(70svh,34rem)]');
     expect(screen.getByRole('heading', { name: 'Caseta de ventas' })).toBeInTheDocument();
     expect(screen.getByText('Atención de lunes a sábado.')).toBeInTheDocument();
   });

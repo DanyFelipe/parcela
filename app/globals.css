@@ -29,6 +29,7 @@
   /* Showroom-specific semantic tokens */
   --color-overlay: var(--overlay);
   --color-panel: var(--panel);
+  --color-panel-border: var(--panel-border);
   --color-status-available: var(--status-available);
   --color-status-available-foreground: var(--status-available-foreground);
   --color-status-reserved: var(--status-reserved);
@@ -123,7 +124,8 @@
 
   /* Showroom-specific */
   --overlay: oklch(0.15 0.004 60);
-  --panel: oklch(0.15 0.004 60 / 0.75);
+  --panel: oklch(0.21 0.008 80);
+  --panel-border: oklch(0.95 0.005 90 / 0.16);
 
   /* Status — armonizados con la paleta, con foreground oscuro para AA */
   --status-available: oklch(0.65 0.13 150);
@@ -147,6 +149,22 @@
   --chart-3: oklch(0.6 0.14 25);
   --chart-4: oklch(0.55 0.16 25);
   --chart-5: oklch(0.45 0.18 25);
+}
+
+@layer components {
+  .glass-panel {
+    border: 1px solid var(--panel-border);
+    background-color: var(--panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .glass-panel {
+      background-color: color-mix(in oklab, var(--panel) 88%, transparent);
+      -webkit-backdrop-filter: blur(18px) saturate(135%);
+      backdrop-filter: blur(18px) saturate(135%);
+    }
+  }
 }
 
 @layer base {

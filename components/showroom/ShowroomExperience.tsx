@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useState } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 
 import { FeatureHotspotsLayer } from '@/components/showroom/FeatureHotspotsLayer';
 import {
@@ -142,77 +143,90 @@ export function ShowroomExperience({
   const showPreviewCard = currentView === VIEW_WITH_LOT_HOTSPOTS && selectedLot !== null;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="absolute inset-0">
-        {hasGridToggle ? (
-          <>
+    <main className="relative isolate h-[100svh] min-h-[100svh] overflow-hidden bg-background text-foreground">
+      <div
+        className="absolute inset-0 overflow-auto overscroll-contain"
+        role="region"
+        aria-label="Render del terreno. Desliza horizontalmente para recorrer la vista."
+        tabIndex={0}
+        data-testid="showroom-render-viewport"
+      >
+        <div className="relative w-[1600px] md:w-full" data-testid="showroom-render-stage">
+          {hasGridToggle ? (
+            <>
+              <img
+                src={currentViewData.base_image_url}
+                alt={viewAltText[currentViewData.id]}
+                className={`relative block h-auto w-full object-fill transition-opacity duration-200 ${
+                  showGrid ? 'opacity-100' : 'opacity-0'
+                }`}
+                data-testid="showroom-base-image"
+              />
+              <img
+                src={currentViewData.alt_image_url!}
+                alt={viewAltText[currentViewData.id]}
+                className={`absolute inset-0 h-full w-full object-fill transition-opacity duration-200 ${
+                  showGrid ? 'opacity-0' : 'opacity-100'
+                }`}
+                data-testid="showroom-alt-image"
+              />
+            </>
+          ) : (
             <img
               src={currentViewData.base_image_url}
               alt={viewAltText[currentViewData.id]}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
-                showGrid ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="relative block h-auto w-full object-fill"
               data-testid="showroom-base-image"
             />
-            <img
-              src={currentViewData.alt_image_url!}
-              alt={viewAltText[currentViewData.id]}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
-                showGrid ? 'opacity-0' : 'opacity-100'
-              }`}
-              data-testid="showroom-alt-image"
+          )}
+
+          {showLotHotspotsLayer && visibleLotStatuses.length > 0 && (
+            <LotStatusLegend statuses={visibleLotStatuses} fadingOut={hotspotsFadingOut} />
+          )}
+
+          {showLotHotspotsLayer && (
+            <LotHotspotsLayer
+              lots={lots}
+              lotHotspots={topHotspots}
+              fadingOut={hotspotsFadingOut}
+              onHotspotClick={handleHotspotClick}
             />
-          </>
-        ) : (
-          <img
-            src={currentViewData.base_image_url}
-            alt={viewAltText[currentViewData.id]}
-            className="h-full w-full object-cover"
-            data-testid="showroom-base-image"
-          />
-        )}
+          )}
+
+          {showFeatureHotspotsLayer && (
+            <FeatureHotspotsLayer
+              featureHotspots={frontFeatureHotspots}
+              fadingOut={hotspotsFadingOut}
+              onNavigate={handleFeatureNavigate}
+              onShowInfo={handleFeatureShowInfo}
+            />
+          )}
+
+          {showTransition && (
+            <div className="absolute inset-0">
+              <TransitionVideoPlayer
+                videoUrl={pendingTransition.videoUrl}
+                destinationView={pendingTransition.toView}
+                destinationImageUrl={destinationViewData.base_image_url}
+              />
+            </div>
+          )}
+
+          <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden="true" />
+        </div>
       </div>
 
-      {showLotHotspotsLayer && visibleLotStatuses.length > 0 && (
-        <LotStatusLegend statuses={visibleLotStatuses} fadingOut={hotspotsFadingOut} />
-      )}
-
-      {showLotHotspotsLayer && (
-        <LotHotspotsLayer
-          lots={lots}
-          lotHotspots={topHotspots}
-          fadingOut={hotspotsFadingOut}
-          onHotspotClick={handleHotspotClick}
-        />
-      )}
-
-      {showFeatureHotspotsLayer && (
-        <FeatureHotspotsLayer
-          featureHotspots={frontFeatureHotspots}
-          fadingOut={hotspotsFadingOut}
-          onNavigate={handleFeatureNavigate}
-          onShowInfo={handleFeatureShowInfo}
-        />
-      )}
-
-      {showTransition && (
-        <TransitionVideoPlayer
-          videoUrl={pendingTransition.videoUrl}
-          destinationView={pendingTransition.toView}
-          destinationImageUrl={destinationViewData.base_image_url}
-        />
-      )}
-
-      <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden="true" />
-      <section className="pointer-events-none relative z-10 flex min-h-screen flex-col items-start justify-end gap-6 p-6 sm:p-10">
-        <div className="max-w-md rounded-lg bg-black/55 p-5 backdrop-blur-sm">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/70">Parcela</p>
-          <h1 className="mt-2 text-3xl font-semibold">Descubre tu próximo terreno</h1>
-          <p className="mt-2 text-white/80">
+      <section className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-auto sm:bottom-8 sm:left-8 sm:gap-6 sm:p-0">
+        <div className="glass-panel max-w-md rounded-2xl p-3 sm:p-5">
+          <p className="text-xs text-muted-foreground">Parcela</p>
+          <h1 className="mt-1 text-xl font-semibold leading-tight sm:mt-2 sm:text-3xl">
+            Descubre tu próximo terreno
+          </h1>
+          <p className="mt-1 text-sm text-foreground/85 sm:mt-2">
             Explora las vistas del proyecto y conoce cada espacio.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="glass-panel pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full p-1">
           <ViewControls
             transitionUrls={transitionUrls}
             onTransitionRequest={handleTransitionRequest}
@@ -224,6 +238,10 @@ export function ShowroomExperience({
               disabled={transitionInProgress}
             />
           )}
+          <span className="ml-1 inline-flex items-center gap-1.5 border-l border-panel-border pl-3 pr-2 text-xs text-muted-foreground sm:hidden">
+            <ArrowLeftRight size={15} aria-hidden="true" />
+            Desliza para explorar
+          </span>
         </div>
       </section>
 

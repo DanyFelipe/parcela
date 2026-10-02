@@ -111,7 +111,18 @@ describe('ShowroomExperience hotspot rendering', () => {
       />
     );
 
-    expect(screen.getByTestId('lot-hotspots-layer')).toBeInTheDocument();
+    const renderViewport = screen.getByTestId('showroom-render-viewport');
+    const renderStage = screen.getByTestId('showroom-render-stage');
+    const hotspots = screen.getByTestId('lot-hotspots-layer');
+
+    expect(renderViewport).toHaveAttribute('tabindex', '0');
+    expect(renderViewport).toHaveAttribute(
+      'aria-label',
+      'Render del terreno. Desliza horizontalmente para recorrer la vista.'
+    );
+    expect(renderStage).toHaveClass('w-[1600px]', 'md:w-full');
+    expect(renderStage).toContainElement(screen.getByTestId('showroom-base-image'));
+    expect(renderStage).toContainElement(hotspots);
   });
 
   it('fades out hotspots when a transition starts from top', () => {

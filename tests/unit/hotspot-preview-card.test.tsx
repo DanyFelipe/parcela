@@ -38,6 +38,11 @@ describe('HotspotPreviewCard', () => {
   it('renders lot name, price, surface and status label', () => {
     render(<HotspotPreviewCard lot={baseLot} onClose={onClose} />);
 
+    expect(screen.getByTestId('hotspot-preview-card')).toHaveClass(
+      'glass-panel',
+      'rounded-t-2xl',
+      'max-h-[min(70svh,34rem)]'
+    );
     expect(screen.getByRole('heading', { name: 'Lote A-01' })).toBeInTheDocument();
     expect(screen.getByText('$ 75.000')).toBeInTheDocument();
     expect(screen.getByText('500 m²')).toBeInTheDocument();

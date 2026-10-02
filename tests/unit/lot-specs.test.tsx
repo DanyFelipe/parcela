@@ -21,6 +21,7 @@ describe('LotSpecs', () => {
       />
     );
 
+    expect(screen.getByRole('region', { name: 'Ficha técnica' })).toHaveClass('glass-panel');
     expect(screen.getByText('Orientación').closest('div')).toHaveTextContent('Norte');
     expect(screen.getByText('Tipo de suelo').closest('div')).toHaveTextContent('Arcilloso');
     expect(screen.getByText('Estado legal').closest('div')).toHaveTextContent('Con escritura');

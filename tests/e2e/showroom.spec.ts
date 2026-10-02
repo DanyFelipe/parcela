@@ -55,4 +55,36 @@ test.describe('showroom view navigation', () => {
     await expect(lotHotspot).toBeVisible();
     await lotHotspot.click();
   });
+
+  test('keeps the render and its hotspots on a horizontally scrollable stage on mobile', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+
+    const viewport = page.getByTestId('showroom-render-viewport');
+    const stage = page.getByTestId('showroom-render-stage');
+
+    await expect(stage).toHaveCSS('width', '1600px');
+    await expect(viewport).toHaveAttribute('tabindex', '0');
+
+    const scrollDimensions = await viewport.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(scrollDimensions.scrollWidth).toBeGreaterThan(scrollDimensions.clientWidth);
+
+    await page.getByRole('button', { name: 'Ver vista aérea' }).click();
+    const lotHotspot = page.getByTestId('lot-hotspot').first();
+    await expect(lotHotspot).toBeVisible();
+
+    const hotspotLeft = await lotHotspot.evaluate((element) => element.style.left);
+    await viewport.evaluate((element) => {
+      element.scrollLeft = 320;
+    });
+
+    await expect.poll(() => viewport.evaluate((element) => element.scrollLeft)).toBe(320);
+    await expect(stage).toHaveCSS('width', '1600px');
+    await expect.poll(() => lotHotspot.evaluate((element) => element.style.left)).toBe(hotspotLeft);
+  });
 });
