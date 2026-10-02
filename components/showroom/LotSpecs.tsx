@@ -16,7 +16,7 @@ export function LotSpecs({
   encumbrances,
 }: LotSpecsProps) {
   return (
-    <section className="glass-panel rounded-2xl p-5 sm:p-6" aria-labelledby="lot-specs-heading">
+    <section className="glass-panel rounded-2xl p-4 sm:p-6" aria-labelledby="lot-specs-heading">
       <h2 id="lot-specs-heading" className="mb-4 text-sm font-medium text-muted-foreground">
         Ficha técnica
       </h2>

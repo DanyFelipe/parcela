@@ -62,7 +62,7 @@ export function ViewControls({ transitionUrls, onTransitionRequest }: ViewContro
   }
 
   return (
-    <nav aria-label="Controles de vista" className="pointer-events-auto flex items-center gap-2">
+    <nav aria-label="Controles de vista" className="pointer-events-auto flex items-center gap-1">
       <Button
         type="button"
         variant="ghost"
@@ -71,7 +71,7 @@ export function ViewControls({ transitionUrls, onTransitionRequest }: ViewContro
         title="Rotar vista"
         disabled={transitionInProgress || !canRotate}
         onClick={handleRotateClick}
-        className="rounded-full bg-black/60 text-white hover:bg-black/80"
+        className="size-11 rounded-full text-foreground hover:bg-foreground/10"
       >
         <RotateCw aria-hidden="true" size={20} />
       </Button>
@@ -83,7 +83,7 @@ export function ViewControls({ transitionUrls, onTransitionRequest }: ViewContro
         title={currentView === 'top' ? 'Volver a vista frontal' : 'Ver vista aérea'}
         disabled={transitionInProgress || !canNavigateTop}
         onClick={handleTopClick}
-        className="rounded-full bg-black/60 text-white hover:bg-black/80"
+        className="size-11 rounded-full text-foreground hover:bg-foreground/10"
       >
         <ArrowUp aria-hidden="true" size={20} />
       </Button>

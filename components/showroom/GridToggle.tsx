@@ -21,7 +21,7 @@ export function GridToggle({ showGrid, onToggle, disabled }: GridToggleProps) {
       aria-pressed={showGrid}
       disabled={disabled}
       onClick={onToggle}
-      className="pointer-events-auto rounded-full bg-black/60 text-white hover:bg-black/80"
+      className="size-11 rounded-full text-foreground hover:bg-foreground/10"
       data-testid="grid-toggle"
     >
       <Grid3x3 aria-hidden="true" size={20} />

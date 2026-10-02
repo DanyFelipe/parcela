@@ -10,7 +10,7 @@ interface LotServicesProps {
 
 export function LotServices({ water, electricity, sewage }: LotServicesProps) {
   return (
-    <section className="glass-panel rounded-2xl p-5 sm:p-6" aria-labelledby="lot-services-heading">
+    <section className="glass-panel rounded-2xl p-4 sm:p-6" aria-labelledby="lot-services-heading">
       <h2 id="lot-services-heading" className="mb-4 text-sm font-medium text-muted-foreground">
         Servicios disponibles
       </h2>

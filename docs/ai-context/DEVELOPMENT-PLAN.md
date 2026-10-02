@@ -140,8 +140,8 @@ Objetivo: reemplazar cualquier estilo genérico/placeholder por la dirección de
 | -------- | --------------------------------------------------------------------------------------------- | --------- | ---------- |
 | PARC-501 | Tokens de color/tipografía/spacing en `tailwind.config`/`globals.css` según shadcn/ui + skill | 🔴        | 3          | Done |
 | PARC-502 | Estilo "vidrio esmerilado" en paneles flotantes (preview, popover, ficha)                     | 🟡        | 3          | Done |
-| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)                 | 🔴        | 5          |
-| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11)        | 🔴        | 5          |
+| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)                 | 🔴        | 5          | Done |
+| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11)        | 🔴        | 5          | Done |
 | PARC-505 | Verificación de contraste AA en texto sobre imagen                                            | 🟢        | 2          |
 | PARC-506 | Auditoría Lighthouse (Performance > 85 desktop / > 70 mobile, ver 01 §7)                      | 🟡        | 3          |
 

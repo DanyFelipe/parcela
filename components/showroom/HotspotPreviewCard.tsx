@@ -35,14 +35,14 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center p-6 sm:items-end sm:justify-center"
+      className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center p-0 sm:items-end sm:p-6"
       data-testid="hotspot-preview-container"
     >
       <AnimatePresence mode="wait">
         {lot && (
           <motion.div
             key={lot.id}
-            className="glass-panel pointer-events-auto relative w-full max-w-sm rounded-2xl p-5 text-foreground"
+            className="glass-panel pointer-events-auto relative max-h-[min(70svh,34rem)] w-full max-w-none overflow-y-auto rounded-b-none rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-foreground sm:max-h-none sm:max-w-sm sm:overflow-visible sm:rounded-2xl sm:pb-5"
             initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
@@ -58,7 +58,7 @@ export function HotspotPreviewCard({ lot, onClose }: HotspotPreviewCardProps) {
               size="icon"
               onClick={onClose}
               aria-label="Cerrar vista previa"
-              className="absolute right-2 top-2 text-foreground hover:bg-foreground/10"
+              className="absolute right-2 top-2 size-11 text-foreground hover:bg-foreground/10"
             >
               <X size={18} />
             </Button>

@@ -5,7 +5,7 @@ interface LotTechnicalPlanProps {
 
 export function LotTechnicalPlan({ imageUrl, lotName }: LotTechnicalPlanProps) {
   return (
-    <section className="glass-panel rounded-2xl p-5 sm:p-6" aria-labelledby="lot-plan-heading">
+    <section className="glass-panel rounded-2xl p-4 sm:p-6" aria-labelledby="lot-plan-heading">
       <h2 id="lot-plan-heading" className="mb-4 text-sm font-medium text-muted-foreground">
         Plano técnico
       </h2>

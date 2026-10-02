@@ -44,14 +44,14 @@ export default async function LotPage({ params }: LotPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="mb-6">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-12">
+        <div className="mb-5 sm:mb-6">
           <BackToShowroomLink />
         </div>
 
-        <header className="mb-10">
+        <header className="mb-6 sm:mb-10">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{lot.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-4xl">{lot.name}</h1>
             <span
               className={cn(
                 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
@@ -62,13 +62,13 @@ export default async function LotPage({ params }: LotPageProps) {
             </span>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-lg text-white/80">
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-base text-foreground/80 sm:mt-4 sm:text-lg">
             <p>{formatPrice(lot.price)}</p>
             <p>{formatSurface(lot.surface_area)}</p>
           </div>
         </header>
 
-        <section className="grid gap-8 lg:grid-cols-2">
+        <section className="grid gap-4 sm:gap-8 lg:grid-cols-2">
           {lot.technical_plan_url && (
             <div className="order-2 lg:order-1">
               <LotTechnicalPlan imageUrl={lot.technical_plan_url} lotName={lot.name} />
@@ -84,7 +84,7 @@ export default async function LotPage({ params }: LotPageProps) {
               encumbrances={lot.encumbrances}
             />
 
-            <div className="mt-8">
+            <div className="mt-4 sm:mt-8">
               <LotServices
                 water={lot.has_water_service}
                 electricity={lot.has_electricity_service}
@@ -96,7 +96,7 @@ export default async function LotPage({ params }: LotPageProps) {
 
         {lot.description && (
           <section
-            className="glass-panel mt-10 rounded-2xl p-5 sm:p-6"
+            className="glass-panel mt-6 rounded-2xl p-4 sm:mt-10 sm:p-6"
             aria-labelledby="lot-description-heading"
           >
             <h2
@@ -110,7 +110,7 @@ export default async function LotPage({ params }: LotPageProps) {
         )}
 
         {lot.image_360_url && (
-          <section className="mt-10">
+          <section className="mt-6 sm:mt-10">
             <h2 className="mb-3 text-sm font-medium text-white/60">Recorrido 360°</h2>
             <Viewer360 imageUrl={lot.image_360_url} />
           </section>
