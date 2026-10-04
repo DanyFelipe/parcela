@@ -1,9 +1,10 @@
 'use client';
 
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useShowroomStore } from '@/lib/store/showroom.store';
 
 import '@photo-sphere-viewer/core/index.css';
 
@@ -12,12 +13,15 @@ interface Viewer360Props {
 }
 
 export function Viewer360({ imageUrl }: Viewer360Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = useShowroomStore((state) => state.isViewer360Open);
+  const setViewer360Open = useShowroomStore((state) => state.setViewer360Open);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<InstanceType<typeof import('@photo-sphere-viewer/core').Viewer> | null>(
     null
   );
+
+  useEffect(() => () => setViewer360Open(false), [setViewer360Open]);
 
   useEffect(() => {
     if (!imageUrl || !isOpen || !containerRef.current) {
@@ -61,13 +65,13 @@ export function Viewer360({ imageUrl }: Viewer360Props) {
 
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
-        setIsOpen(false);
+        setViewer360Open(false);
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, setViewer360Open]);
 
   if (!imageUrl) {
     return null;
@@ -78,7 +82,7 @@ export function Viewer360({ imageUrl }: Viewer360Props) {
       <Button
         type="button"
         variant="outline"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setViewer360Open(true)}
         aria-label="Ver recorrido 360° del lote"
         data-testid="viewer-360-button"
       >
@@ -87,26 +91,11 @@ export function Viewer360({ imageUrl }: Viewer360Props) {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex flex-col bg-background"
+          className="fixed inset-0 z-30 flex flex-col bg-background"
           role="dialog"
-          aria-modal="true"
           aria-label="Recorrido 360° del lote"
           data-testid="viewer-360-modal"
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <span className="text-sm font-medium text-foreground">Recorrido 360°</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              aria-label="Cerrar recorrido 360°"
-              data-testid="viewer-360-close"
-            >
-              <X className="size-5 text-foreground" />
-            </Button>
-          </div>
-
           <div className="relative flex-1 overflow-hidden">
             {isLoading && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-background/85 text-foreground">

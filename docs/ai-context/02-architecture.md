@@ -38,14 +38,14 @@
 
 /components
   /showroom
-    /TopBar.tsx                  → Barra persistente (volver + menú) en toda la app
+    /TopBar.tsx                  → Barra persistente (volver + menú) en toda la app; también sobre el visor 360°
     /TransitionVideoPlayer.tsx   → Reproductor de video para transiciones entre vistas (ver sección 6)
     /Hotspot.tsx                 → Punto interactivo de un lote (exclusivo de la vista top, ver sección 7.1)
     /HotspotPreviewCard.tsx      → Modal rápido con datos básicos al hacer click en un hotspot de lote
     /FeatureHotspot.tsx          → Marcador especial de punto de interés en 'front' (ver sección 7.2)
     /FeatureInfoPopover.tsx      → Panel simple para hotspots especiales con action = 'show_info'
     /ViewControls.tsx            → Botón de rotación front↔rear + control dedicado para top (ver sección 7.4)
-    /Viewer360.tsx               → Wrapper de Photo Sphere Viewer
+    /Viewer360.tsx               → Wrapper de Photo Sphere Viewer (sin cabecera propia; lo cierra la TopBar)
   /admin
     /LotForm.tsx                 → Formulario de edición (RHF + Zod) — ver sección 0, no construir aún
     /LotTable.tsx                → Listado de lotes — ver sección 0, no construir aún
@@ -66,7 +66,7 @@
   /validations
     /lot.schema.ts                → Esquemas Zod (fuente única de validación)
   /store
-    /showroom.store.ts            → Zustand: vista actual, lote seleccionado, estado de transición
+    /showroom.store.ts            → Zustand: vista actual, lote seleccionado, estado de transición, visor 360°
 
 /docs
   /schema.sql                     → Esquema real y actual de la base de datos
@@ -221,7 +221,7 @@ export async function updateLot(lotId: string, changes: unknown) {
 
 ## 5. Patrón de estado: Zustand (showroom público)
 
-El estado de la experiencia interactiva (vista actual, lote seleccionado, si hay una transición en curso) vive en un store de Zustand, no en `useState` disperso entre componentes ni en la URL únicamente.
+El estado de la experiencia interactiva (vista actual, lote seleccionado, si hay una transición en curso, si el visor 360° está abierto) vive en un store de Zustand, no en `useState` disperso entre componentes ni en la URL únicamente. La barra persistente se comunica con el showroom y con el visor a través de este store (contador `frontRequest` para volver a `front`, flag `isViewer360Open` para el visor).
 
 ```typescript
 // lib/store/showroom.store.ts
@@ -233,18 +233,26 @@ interface ShowroomState {
   currentView: ShowroomView;
   selectedLotId: string | null;
   transitionInProgress: boolean;
+  frontRequest: number;
+  isViewer360Open: boolean;
   setView: (view: ShowroomView) => void;
   selectLot: (lotId: string | null) => void;
   setTransitionInProgress: (value: boolean) => void;
+  requestFront: () => void;
+  setViewer360Open: (isOpen: boolean) => void;
 }
 
 export const useShowroomStore = create<ShowroomState>((set) => ({
   currentView: 'front',
   selectedLotId: null,
   transitionInProgress: false,
+  frontRequest: 0,
+  isViewer360Open: false,
   setView: (currentView) => set({ currentView }),
   selectLot: (selectedLotId) => set({ selectedLotId }),
   setTransitionInProgress: (value) => set({ transitionInProgress: value }),
+  requestFront: () => set((state) => ({ frontRequest: state.frontRequest + 1 })),
+  setViewer360Open: (isViewer360Open) => set({ isViewer360Open }),
 }));
 ```
 
@@ -505,6 +513,7 @@ components/showroom/
 - Se monta solo bajo demanda, no se precarga junto con la ficha técnica.
 - Debe mostrarse un estado de carga mientras la imagen panorámica se descarga.
 - Si `image_360_url` es `null`, el botón/opción de 360° **no se renderiza en absoluto**.
+- El visor **no tiene cabecera ni botón de cierre propios**: se renderiza por debajo de la barra persistente (`TopBar`), que queda visible sobre él, y su botón "volver" lo cierra (además de `Escape`). El visor se cierra al desmontarse (reset automático de `isViewer360Open`).
 
 ## 10. Flujo de interacción completo (referencia)
 
@@ -518,14 +527,15 @@ Vista general — "front" (con feature hotspots: acceso, amenidad, caseta de ven
   → click en control de vista top otra vez (o "volver") → TransitionVideoPlayer reproduce top-to-front.mp4 → Vista "front"
   → click en hotspot de lote (solo disponible en "top") → se abre HotspotPreviewCard (fade-in de UI, sin video, sin cambio de render de fondo)
       → click en "Ver ficha completa" → navegación real a /lot/[id] (página indexable, con plano técnico y datos ampliados)
-          → si el lote tiene image_360_url → opción "Ver en 360°" abre Viewer360 bajo demanda
+          → si el lote tiene image_360_url → opción "Ver en 360°" abre Viewer360 bajo demanda, con la barra persistente visible por encima
+              → botón "volver" de la barra persistente (o Escape) → cierra el visor y vuelve a la ficha del lote
           → botón "volver" de la barra persistente → regresa al showroom; si la vista activa no era "front", cambia a "front" de forma instantánea (ver excepción abajo)
       → cerrar el preview sin navegar → fade-out del modal, el render de fondo permanece igual
 ```
 
 **Regla:** no existe el concepto de "reversa" en ningún punto de este flujo — cada cambio de vista siempre reproduce un clip de video hacia adelante, específico para ese sentido exacto. Si una tarea futura pidiera "un botón para deshacer/volver a la vista anterior con animación", la respuesta correcta es reproducir el clip correspondiente al sentido inverso ya existente en `view_transitions` (ej. `rear→front`), nunca intentar reproducir `front→rear` al revés.
 
-**Excepción aprobada — botón "volver" de la barra persistente (`TopBar`):** este botón no reproduce ningún clip. Como `front` es el punto de inicio y fin de la experiencia, dentro del showroom lleva siempre a `front` de forma instantánea (`requestFront` en el store), limpiando preview/popover y cualquier transición en curso. Fuera del showroom (ficha de lote) usa la navegación normal del historial con fallback a `/`. La regla de "no reversa" sigue intacta para los controles de vista y los hotspots; esta es la única excepción y no debe replicarse en otros puntos del flujo.
+**Excepción aprobada — botón "volver" de la barra persistente (`TopBar`):** este botón no reproduce ningún clip. Su orden de prioridad es: (1) si el visor 360° está abierto, lo cierra; (2) dentro del showroom, como `front` es el punto de inicio y fin de la experiencia, lleva siempre a `front` de forma instantánea (`requestFront` en el store), limpiando preview/popover y cualquier transición en curso; (3) fuera del showroom (ficha de lote) usa la navegación normal del historial con fallback a `/`. La regla de "no reversa" sigue intacta para los controles de vista y los hotspots; esta es la única excepción y no debe replicarse en otros puntos del flujo.
 
 ## 11. Estrategia responsive (regla estricta — leer antes de tocar cualquier layout)
 
@@ -559,4 +569,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-10-02 · **Versión:** 3.6
+**Última actualización:** 2026-10-04 · **Versión:** 3.7

@@ -25,8 +25,15 @@ export function TopBar() {
   const pathname = usePathname();
   const currentView = useShowroomStore((state) => state.currentView);
   const requestFront = useShowroomStore((state) => state.requestFront);
+  const isViewer360Open = useShowroomStore((state) => state.isViewer360Open);
+  const setViewer360Open = useShowroomStore((state) => state.setViewer360Open);
 
   function handleBack(): void {
+    if (isViewer360Open) {
+      setViewer360Open(false);
+      return;
+    }
+
     if (pathname === SHOWROOM_PATH && currentView !== 'front') {
       requestFront();
       return;
