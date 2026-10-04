@@ -4,12 +4,13 @@ import { useShowroomStore, type ShowroomState } from '@/lib/store/showroom.store
 
 const initialState: Pick<
   ShowroomState,
-  'currentView' | 'selectedLotId' | 'transitionInProgress' | 'frontRequest'
+  'currentView' | 'selectedLotId' | 'transitionInProgress' | 'frontRequest' | 'isViewer360Open'
 > = {
   currentView: 'front',
   selectedLotId: null,
   transitionInProgress: false,
   frontRequest: 0,
+  isViewer360Open: false,
 };
 
 describe('useShowroomStore', () => {
@@ -54,6 +55,16 @@ describe('useShowroomStore', () => {
     useShowroomStore.getState().requestFront();
 
     expect(useShowroomStore.getState().frontRequest).toBe(2);
+  });
+
+  it('opens and closes the on-demand 360 viewer', () => {
+    expect(useShowroomStore.getState().isViewer360Open).toBe(false);
+
+    useShowroomStore.getState().setViewer360Open(true);
+    expect(useShowroomStore.getState().isViewer360Open).toBe(true);
+
+    useShowroomStore.getState().setViewer360Open(false);
+    expect(useShowroomStore.getState().isViewer360Open).toBe(false);
   });
 
   it('keeps state isolated between tests', () => {

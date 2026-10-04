@@ -20,7 +20,7 @@ import { useShowroomStore } from '@/lib/store/showroom.store';
 describe('TopBar', () => {
   beforeEach(() => {
     navigationMocks.pathname = '/';
-    useShowroomStore.setState({ currentView: 'front', frontRequest: 0 });
+    useShowroomStore.setState({ currentView: 'front', frontRequest: 0, isViewer360Open: false });
   });
 
   afterEach(() => {
@@ -64,6 +64,19 @@ describe('TopBar', () => {
 
     expect(navigationMocks.push).toHaveBeenCalledWith('/');
     expect(navigationMocks.back).not.toHaveBeenCalled();
+  });
+
+  it('closes the 360 viewer from the lot page instead of navigating', () => {
+    navigationMocks.pathname = '/lot/lot-1';
+    useShowroomStore.setState({ isViewer360Open: true });
+    window.history.pushState({ idx: 2 }, '');
+
+    render(<TopBar />);
+    fireEvent.click(screen.getByTestId('top-bar-back'));
+
+    expect(useShowroomStore.getState().isViewer360Open).toBe(false);
+    expect(navigationMocks.back).not.toHaveBeenCalled();
+    expect(navigationMocks.push).not.toHaveBeenCalled();
   });
 
   it('leaves a non-showroom page through history regardless of the current view', () => {

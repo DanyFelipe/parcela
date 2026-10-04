@@ -1,9 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '@testing-library/jest-dom/vitest';
 
 import { Viewer360 } from '@/components/showroom/Viewer360';
+import { useShowroomStore } from '@/lib/store/showroom.store';
 
 const mocks = vi.hoisted(() => ({
   destroy: vi.fn(),
@@ -22,6 +23,10 @@ vi.mock('@photo-sphere-viewer/core', () => ({
 }));
 
 describe('Viewer360', () => {
+  beforeEach(() => {
+    useShowroomStore.setState({ isViewer360Open: false });
+  });
+
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -61,7 +66,7 @@ describe('Viewer360', () => {
     });
   });
 
-  it('closes the modal when clicking the close button', async () => {
+  it('renders no internal header, since the persistent top bar closes the viewer', async () => {
     render(<Viewer360 imageUrl="https://placehold.co/panorama.jpg" />);
 
     fireEvent.click(screen.getByTestId('viewer-360-button'));
@@ -69,7 +74,20 @@ describe('Viewer360', () => {
       expect(screen.getByTestId('viewer-360-modal')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('viewer-360-close'));
+    expect(screen.queryByTestId('viewer-360-close')).not.toBeInTheDocument();
+  });
+
+  it('closes the modal when the top bar requests it', async () => {
+    render(<Viewer360 imageUrl="https://placehold.co/panorama.jpg" />);
+
+    fireEvent.click(screen.getByTestId('viewer-360-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('viewer-360-modal')).toBeInTheDocument();
+    });
+
+    act(() => {
+      useShowroomStore.getState().setViewer360Open(false);
+    });
 
     await waitFor(() => {
       expect(screen.queryByTestId('viewer-360-modal')).not.toBeInTheDocument();
@@ -99,7 +117,9 @@ describe('Viewer360', () => {
       expect(screen.getByTestId('viewer-360-modal')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('viewer-360-close'));
+    act(() => {
+      useShowroomStore.getState().setViewer360Open(false);
+    });
     await waitFor(() => {
       expect(screen.queryByTestId('viewer-360-modal')).not.toBeInTheDocument();
     });
