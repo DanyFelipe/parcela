@@ -31,6 +31,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Observabilidad / identidad (opcionales en local)
 NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_ORG=                         # source maps en build; no se requiere sin Sentry auth token
+SENTRY_PROJECT=                     # source maps en build; no se requiere sin Sentry auth token
+SENTRY_AUTH_TOKEN=
 NEXT_PUBLIC_CLIENT_SLUG=
 ```
 
@@ -91,8 +94,9 @@ Modelo multi-cliente (`01-stack-and-infra.md`, sección 3): **un proyecto de Ver
 Supabase + un bucket de storage independiente por cliente**, con el mismo código base. Las
 diferencias viven solo en variables de entorno y datos — nunca en ramas de código.
 
-Corresponde a los tickets del Sprint 6: `PARC-603` (proyecto + variables), `PARC-604` (dominio),
-`PARC-606` (auditoría RLS/GRANT) y `PARC-607` (smoke test de producción).
+Corresponde a los tickets del Sprint 6: `PARC-601` (Sentry), `PARC-602` (Analytics), `PARC-603`
+(proyecto + variables), `PARC-604` (dominio), `PARC-606` (auditoría RLS/GRANT) y `PARC-607`
+(smoke test de producción).
 
 ### 7.0 Prerrequisitos
 
@@ -175,8 +179,10 @@ cualquier variable hay que **redeploy** — las `NEXT_PUBLIC_*` se _inlinean_ en
 | `STORAGE_PROVIDER`              | Sí          | Servidor     | `vercel-blob` (único soportado hoy)                                |
 | `BLOB_READ_WRITE_TOKEN`         | Sí          | **Servidor** | Lo inyecta Vercel al conectar el Blob store                        |
 | `NEXT_PUBLIC_SITE_URL`          | **Sí**      | Cliente      | URL pública final, **sin barra final** (ej. `https://cliente.com`) |
-| `NEXT_PUBLIC_SENTRY_DSN`        | No          | Cliente      | Ver nota de Sentry abajo (aún no cableado)                         |
-| `SENTRY_AUTH_TOKEN`             | No          | Servidor     | Solo source maps en build                                          |
+| `NEXT_PUBLIC_SENTRY_DSN`        | No          | Cliente      | Captura de errores en producción (Sentry ya cableado)              |
+| `SENTRY_ORG`                    | No          | **Servidor** | Requerido junto a PROJECT + AUTH_TOKEN para source maps            |
+| `SENTRY_PROJECT`                | No          | **Servidor** | Requerido junto a ORG + AUTH_TOKEN para source maps                |
+| `SENTRY_AUTH_TOKEN`             | No          | **Servidor** | Requerido junto a ORG + PROJECT para source maps                   |
 | `NEXT_PUBLIC_CLIENT_SLUG`       | No          | Cliente      | Solo identificación en logs; **no** ramifica lógica                |
 
 **Puntos críticos:**
@@ -187,9 +193,10 @@ cualquier variable hay que **redeploy** — las `NEXT_PUBLIC_*` se _inlinean_ en
 - El valor de `NEXT_PUBLIC_SITE_URL` debe coincidir con el dominio real; si primero se despliega en
   `*.vercel.app`, usar esa URL y cambiarla al configurar el dominio (7.5) + redeploy.
 
-> **Sentry (pendiente, `PARC-601`):** `@sentry/nextjs` está instalado pero **no está cableado**
-> (no hay `instrumentation.ts` ni configs de Sentry). Definir `NEXT_PUBLIC_SENTRY_DSN` **no** captura
-> errores todavía; requiere el trabajo de `PARC-601`.
+> **Sentry:** el SDK ya está cableado (`instrumentation.ts` + configs + `withSentryConfig`). Con
+> solo `NEXT_PUBLIC_SENTRY_DSN` se capturan errores. Para subir **source maps**, configurar también
+> `SENTRY_ORG`, `SENTRY_PROJECT` y `SENTRY_AUTH_TOKEN`; si faltan, el build no falla pero los errores
+> en producción no tendrán el stack trace desplegado.
 
 ### 7.5 Dominio custom
 
@@ -242,8 +249,6 @@ cualquier variable hay que **redeploy** — las `NEXT_PUBLIC_*` se _inlinean_ en
 ### 7.8 Problemas conocidos
 
 - `STORAGE_PROVIDER=cloudflare-r2` **no funciona** aún (no implementado en el provider).
-- Sentry instalado pero **sin cablear** (`PARC-601`).
-- Vercel Analytics aún **no instalado** (`PARC-602`).
 - `scripts/seed-client.sql` **no es apto para producción** (URLs de placeholder).
 - Next 16 avisa que `middleware.ts` será reemplazado por `proxy` — es solo un warning, no bloquea.
 - Se usan `<img>` nativos (no `next/image`), por lo que **no** hace falta configurar
@@ -251,4 +256,4 @@ cualquier variable hay que **redeploy** — las `NEXT_PUBLIC_*` se _inlinean_ en
 
 ---
 
-**Última actualización:** 2026-10-06 · **Versión:** 2.0
+**Última actualización:** 2026-10-07 · **Versión:** 2.1
