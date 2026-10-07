@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { TopBar } from '@/components/showroom/TopBar';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <TopBar />
         {children}
+        <Analytics />
       </body>
     </html>
   );

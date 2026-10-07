@@ -18,8 +18,6 @@
 
 ### Estrategia única de verificación externa
 
-Cada integración externa se valida en tres capas, sin mezclar responsabilidades:
-
 | Capa              | Comando/herramienta                      | Qué demuestra                                                                           | Requiere credenciales reales |
 | ----------------- | ---------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------- |
 | Unitario          | `pnpm test` (Vitest)                     | Contratos y manejo de errores con SDKs mockeados                                        | No                           |
@@ -77,20 +75,20 @@ Objetivo: el usuario puede ver el terreno en `front` y rotar hacia `rear` con la
 
 Objetivo: navegación hacia `top`, hotspots de lote funcionando ahí, y los `feature_hotspots` en `front`.
 
-| Ticket   | Título                                                                                                                                                                                                                               | Prioridad | Estimación |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------- |
-| PARC-201 | Seed: transición `front↔top` + datos de prueba de 5-8 lotes en `lots`                                                                                                                                                                | 🔴        | 2          | Done |
-| PARC-202 | Control de UI dedicado para entrar/salir de `top` (distinto del ciclo front/rear)                                                                                                                                                    | 🔴        | 2          | Done |
-| PARC-203 | Seed: `lot_hotspots` (posiciones % de cada lote en `top`)                                                                                                                                                                            | 🔴        | 2          | Done |
-| PARC-204 | Componente `Hotspot` + renderizado condicional (solo visible en `top`, ver 02 §7.1)                                                                                                                                                  | 🔴        | 3          | Done |
-| PARC-205 | Patrón fade-out/fade-in de hotspots al iniciar/terminar transición                                                                                                                                                                   | 🟡        | 2          | Done |
-| PARC-206 | Seed: `feature_hotspots` en `front` (mínimo: `lots_overview`, `sales_office`)                                                                                                                                                        | 🟡        | 1          | Done |
-| PARC-207 | Componente `FeatureHotspot` + despacho `navigate_to_view` vs `show_info`                                                                                                                                                             | 🟡        | 5          | Done |
-| PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          | Done |
-| PARC-209 | Toggle de grid en vista `top` (`base_image_url` ↔ `alt_image_url`)                                                                                                                                                                   | 🟢        | 2          | Done |
-| PARC-210 | Consejo UX de saturación: marcadores pequeños + color por `status`                                                                                                                                                                   | 🟡        | 3          | Done |
-| PARC-211 | Test E2E: flujo completo front → top (control o hotspot `lots_overview`) → click en lote                                                                                                                                             | 🟡        | 3          | Done |
-| PARC-212 | Schema de validación Zod del lote (`lib/validations/lot.schema.ts`) alineado a `docs/schema.sql` — sin UI de CRUD todavía (ver `02-architecture.md` §0: definir la validación desde ya, aunque hoy nadie la use desde un formulario) | 🟡        | 3          | Done |
+| Ticket   | Título                                                                                                                                                                                                                               | Prioridad | Estimación | Estado |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------- | ------ |
+| PARC-201 | Seed: transición `front↔top` + datos de prueba de 5-8 lotes en `lots`                                                                                                                                                                | 🔴        | 2          | Done   |
+| PARC-202 | Control de UI dedicado para entrar/salir de `top` (distinto del ciclo front/rear)                                                                                                                                                    | 🔴        | 2          | Done   |
+| PARC-203 | Seed: `lot_hotspots` (posiciones % de cada lote en `top`)                                                                                                                                                                            | 🔴        | 2          | Done   |
+| PARC-204 | Componente `Hotspot` + renderizado condicional (solo visible en `top`, ver 02 §7.1)                                                                                                                                                  | 🔴        | 3          | Done   |
+| PARC-205 | Patrón fade-out/fade-in de hotspots al iniciar/terminar transición                                                                                                                                                                   | 🟡        | 2          | Done   |
+| PARC-206 | Seed: `feature_hotspots` en `front` (mínimo: `lots_overview`, `sales_office`)                                                                                                                                                        | 🟡        | 1          | Done   |
+| PARC-207 | Componente `FeatureHotspot` + despacho `navigate_to_view` vs `show_info`                                                                                                                                                             | 🟡        | 5          | Done   |
+| PARC-208 | Componente `FeatureInfoPopover` (panel simple, Framer Motion)                                                                                                                                                                        | 🟡        | 2          | Done   |
+| PARC-209 | Toggle de grid en vista `top` (`base_image_url` ↔ `alt_image_url`)                                                                                                                                                                   | 🟢        | 2          | Done   |
+| PARC-210 | Consejo UX de saturación: marcadores pequeños + color por `status`                                                                                                                                                                   | 🟡        | 3          | Done   |
+| PARC-211 | Test E2E: flujo completo front → top (control o hotspot `lots_overview`) → click en lote                                                                                                                                             | 🟡        | 3          | Done   |
+| PARC-212 | Schema de validación Zod del lote (`lib/validations/lot.schema.ts`) alineado a `docs/schema.sql` — sin UI de CRUD todavía (ver `02-architecture.md` §0: definir la validación desde ya, aunque hoy nadie la use desde un formulario) | 🟡        | 3          | Done   |
 
 **Criterio de salida del sprint:** el usuario puede llegar a `top` de dos formas (control dedicado o hotspot `lots_overview`), ver los lotes marcados con color según estado, y clickear uno.
 
@@ -100,16 +98,16 @@ Objetivo: navegación hacia `top`, hotspots de lote funcionando ahí, y los `fea
 
 Objetivo: los dos niveles de información del lote, con la página completa cumpliendo los requisitos de SEO ya definidos.
 
-| Ticket   | Título                                                                                            | Prioridad | Estimación |
-| -------- | ------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-301 | Componente `HotspotPreviewCard` (modal rápido: precio, superficie, estado)                        | 🔴        | 3          | Done |
-| PARC-302 | `app/lot/[id]/page.tsx`: Server Component con datos completos del lote                            | 🔴        | 5          | Done |
-| PARC-303 | `generateMetadata` dinámico (title, description) por lote                                         | 🔴        | 2          | Done |
-| PARC-304 | Open Graph (`og:image`) + JSON-LD (schema.org) por lote                                           | 🟡        | 3          | Done |
-| PARC-305 | `app/sitemap.ts` dinámico generado desde `lots`                                                   | 🟡        | 2          | Done |
-| PARC-306 | Sección de plano técnico + servicios + estado legal en la ficha completa                          | 🔴        | 3          | Done |
-| PARC-307 | Botón "volver" (navegación normal, sin animación — ver 02 §8.2)                                   | 🟢        | 1          | Done |
-| PARC-308 | Test E2E: hotspot → preview → "ver ficha completa" → página indexable carga con metadata correcta | 🟡        | 3          | Done |
+| Ticket   | Título                                                                                            | Prioridad | Estimación | Estado |
+| -------- | ------------------------------------------------------------------------------------------------- | --------- | ---------- | ------ |
+| PARC-301 | Componente `HotspotPreviewCard` (modal rápido: precio, superficie, estado)                        | 🔴        | 3          | Done   |
+| PARC-302 | `app/lot/[id]/page.tsx`: Server Component con datos completos del lote                            | 🔴        | 5          | Done   |
+| PARC-303 | `generateMetadata` dinámico (title, description) por lote                                         | 🔴        | 2          | Done   |
+| PARC-304 | Open Graph (`og:image`) + JSON-LD (schema.org) por lote                                           | 🟡        | 3          | Done   |
+| PARC-305 | `app/sitemap.ts` dinámico generado desde `lots`                                                   | 🟡        | 2          | Done   |
+| PARC-306 | Sección de plano técnico + servicios + estado legal en la ficha completa                          | 🔴        | 3          | Done   |
+| PARC-307 | Botón "volver" (navegación normal, sin animación — ver 02 §8.2)                                   | 🟢        | 1          | Done   |
+| PARC-308 | Test E2E: hotspot → preview → "ver ficha completa" → página indexable carga con metadata correcta | 🟡        | 3          | Done   |
 
 **Criterio de salida del sprint:** cada lote tiene una URL real (`/lot/[id]`) indexable, con toda la ficha ampliada, accesible desde el preview rápido.
 
@@ -119,14 +117,14 @@ Objetivo: los dos niveles de información del lote, con la página completa cump
 
 Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya identificados en diseño.
 
-| Ticket   | Título                                                                            | Prioridad | Estimación |
-| -------- | --------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-401 | Integración de Photo Sphere Viewer (`Viewer360.tsx`)                              | 🟡        | 5          | Done |
-| PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          | Done |
-| PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          | Done |
-| PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          |
-| PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          | Done |
-| PARC-406 | Accesibilidad: `aria-label`, navegación por teclado en hotspots y controles       | 🟡        | 3          |
+| Ticket   | Título                                                                            | Prioridad | Estimación | Estado |
+| -------- | --------------------------------------------------------------------------------- | --------- | ---------- | ------ |
+| PARC-401 | Integración de Photo Sphere Viewer (`Viewer360.tsx`)                              | 🟡        | 5          | Done   |
+| PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          | Done   |
+| PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          | Done   |
+| PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          |        |
+| PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          | Done   |
+| PARC-406 | Accesibilidad: `aria-label`, navegación por teclado en hotspots y controles       | 🟡        | 3          |        |
 
 **Criterio de salida del sprint:** experiencia inmersiva completa según lo diseñado, con las capas de accesibilidad y performance ya contempladas en los documentos base.
 
@@ -136,14 +134,14 @@ Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya ide
 
 Objetivo: reemplazar cualquier estilo genérico/placeholder por la dirección de diseño del proyecto (`shadcn/ui` estándar + skill `frontend-design`, ver `00-INDEX.md`), y aplicar la estrategia responsive específica del proyecto.
 
-| Ticket   | Título                                                                                        | Prioridad | Estimación |
-| -------- | --------------------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-501 | Tokens de color/tipografía/spacing en `tailwind.config`/`globals.css` según shadcn/ui + skill | 🔴        | 3          | Done |
-| PARC-502 | Estilo "vidrio esmerilado" en paneles flotantes (preview, popover, ficha)                     | 🟡        | 3          | Done |
-| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)                 | 🔴        | 5          | Done |
-| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11)        | 🔴        | 5          | Done |
-| PARC-505 | Verificación de contraste AA en texto sobre imagen                                            | 🟢        | 2          |
-| PARC-506 | Auditoría Lighthouse (Performance > 85 desktop / > 70 mobile, ver 01 §7)                      | 🟡        | 3          |
+| Ticket   | Título                                                                                        | Prioridad | Estimación | Estado |
+| -------- | --------------------------------------------------------------------------------------------- | --------- | ---------- | ------ |
+| PARC-501 | Tokens de color/tipografía/spacing en `tailwind.config`/`globals.css` según shadcn/ui + skill | 🔴        | 3          | Done   |
+| PARC-502 | Estilo "vidrio esmerilado" en paneles flotantes (preview, popover, ficha)                     | 🟡        | 3          | Done   |
+| PARC-503 | Layout responsive de la UI general (navbar, paneles → bottom sheet en mobile)                 | 🔴        | 5          | Done   |
+| PARC-504 | Scroll/slider horizontal para el render en mobile (sin reescalar hotspots, ver 02 §11)        | 🔴        | 5          | Done   |
+| PARC-505 | Verificación de contraste AA en texto sobre imagen                                            | 🟢        | 2          |        |
+| PARC-506 | Auditoría Lighthouse (Performance > 85 desktop / > 70 mobile, ver 01 §7)                      | 🟡        | 3          |        |
 
 **Criterio de salida del sprint:** el showroom se ve y se siente como el producto final diseñado con shadcn/ui + la skill `frontend-design`, en desktop y mobile.
 
@@ -153,15 +151,15 @@ Objetivo: reemplazar cualquier estilo genérico/placeholder por la dirección de
 
 Objetivo: dejar el proyecto listo para mostrarse a un cliente real (piloto) en producción.
 
-| Ticket   | Título                                                                                          | Prioridad | Estimación |
-| -------- | ----------------------------------------------------------------------------------------------- | --------- | ---------- |
-| PARC-601 | Configuración de Sentry (captura de errores en producción)                                      | 🟡        | 2          |
-| PARC-602 | Vercel Analytics integrado                                                                      | 🟢        | 1          |
-| PARC-603 | Proyecto conectado a Vercel + variables de entorno de producción                                | 🔴        | 2          |
-| PARC-604 | Dominio custom configurado (si ya hay uno para el cliente piloto)                               | 🟢        | 1          |
-| PARC-605 | Suite completa de Playwright cubriendo el flujo crítico end-to-end                              | 🔴        | 5          |
-| PARC-606 | Revisión final de RLS/GRANT en el proyecto de producción de Supabase                            | 🔴        | 2          |
-| PARC-607 | Smoke test manual completo del entorno de producción (sin repetir el smoke local de `PARC-111`) | 🔴        | 2          |
+| Ticket   | Título                                                                                          | Prioridad | Estimación | Estado |
+| -------- | ----------------------------------------------------------------------------------------------- | --------- | ---------- | ------ |
+| PARC-601 | Configuración de Sentry (captura de errores en producción)                                      | 🟡        | 2          | Done   |
+| PARC-602 | Vercel Analytics integrado                                                                      | 🟢        | 1          | Done   |
+| PARC-603 | Proyecto conectado a Vercel + variables de entorno de producción                                | 🔴        | 2          | Done   |
+| PARC-604 | Dominio custom configurado (si ya hay uno para el cliente piloto)                               | 🟢        | 1          |        |
+| PARC-605 | Suite completa de Playwright cubriendo el flujo crítico end-to-end                              | 🔴        | 5          |        |
+| PARC-606 | Revisión final de RLS/GRANT en el proyecto de producción de Supabase                            | 🔴        | 2          |        |
+| PARC-607 | Smoke test manual completo del entorno de producción (sin repetir el smoke local de `PARC-111`) | 🔴        | 2          |        |
 
 **Criterio de salida del sprint:** el proyecto está en producción, monitoreado, con dominio real, listo para el primer cliente piloto.
 
@@ -198,4 +196,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-10-02 · **Versión:** 2.5
+**Última actualización:** 2026-10-07 · **Versión:** 2.6
