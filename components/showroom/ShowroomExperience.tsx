@@ -13,6 +13,7 @@ import {
 import { GridToggle } from '@/components/showroom/GridToggle';
 import { HotspotPreviewCard } from '@/components/showroom/HotspotPreviewCard';
 import { LotHotspotsLayer } from '@/components/showroom/LotHotspotsLayer';
+import { TransitionClipPreloader } from '@/components/showroom/TransitionClipPreloader';
 import { TransitionVideoPlayer } from '@/components/showroom/TransitionVideoPlayer';
 import { ViewControls, type ViewTransitionRequest } from '@/components/showroom/ViewControls';
 import type {
@@ -22,7 +23,10 @@ import type {
   ShowroomViewData,
 } from '@/lib/showroom/showroom-data';
 import { useShowroomStore, type ShowroomView } from '@/lib/store/showroom.store';
-import { resolveTransitionVideoUrl } from '@/lib/transitions/transition-resolver';
+import {
+  getPreloadableTransitionUrls,
+  resolveTransitionVideoUrl,
+} from '@/lib/transitions/transition-resolver';
 import type { TransitionUrls } from '@/lib/transitions/transition-resolver';
 
 interface ShowroomExperienceProps {
@@ -224,6 +228,10 @@ export function ShowroomExperience({
           />
         </div>
       </div>
+
+      <TransitionClipPreloader
+        videoUrls={getPreloadableTransitionUrls(currentView, transitionUrls)}
+      />
 
       <section className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-auto sm:bottom-8 sm:left-8 sm:gap-6 sm:p-0">
         <div className="glass-panel max-w-md rounded-2xl p-3 sm:p-5">
