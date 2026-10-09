@@ -133,13 +133,21 @@ create policy "Public read access to feature_hotspots" on feature_hotspots for s
 -- NOTA: en la fase actual del proyecto, la carga de datos es manual vía SQL Editor
 -- (con las credenciales del proyecto, que no pasan por estas políticas). Estas
 -- políticas ya quedan listas para cuando exista el CRUD autenticado en /admin.
-create policy "Authenticated users can update lots" on lots for update using (auth.role() = 'authenticated');
-create policy "Authenticated users can insert lots" on lots for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can delete lots" on lots for delete using (auth.role() = 'authenticated');
+-- Escritura solo para administradores autenticados, excluyendo usuarios anónimos de Auth
+-- (ver docs/migrations/002_admin_write_hardening.sql).
+create policy "Authenticated users can update lots" on lots for update
+  using ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true')
+  with check ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true');
+create policy "Authenticated users can insert lots" on lots for insert
+  with check ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true');
+create policy "Authenticated users can delete lots" on lots for delete
+  using ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true');
 
 create policy "Authenticated users can manage views" on views for all using (auth.role() = 'authenticated');
 create policy "Authenticated users can manage view_transitions" on view_transitions for all using (auth.role() = 'authenticated');
-create policy "Authenticated users can manage lot_hotspots" on lot_hotspots for all using (auth.role() = 'authenticated');
+create policy "Authenticated users can manage lot_hotspots" on lot_hotspots for all
+  using ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true')
+  with check ((select auth.role()) = 'authenticated' and coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true');
 create policy "Authenticated users can manage feature_hotspots" on feature_hotspots for all using (auth.role() = 'authenticated');
 
 -- =============================================================================

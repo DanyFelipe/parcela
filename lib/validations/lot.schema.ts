@@ -10,6 +10,7 @@ import { z } from 'zod';
  * Ver `02-architecture.md` §0 y §4.
  */
 
+export const lotIdSchema = z.string().uuid();
 export const lotStatusSchema = z.enum(['available', 'reserved', 'sold']);
 export const legalStatusSchema = z.enum(['titled', 'in_process', 'not_titled']);
 
@@ -27,11 +28,23 @@ function optionalPositiveNumber() {
   );
 }
 
+const MAX_URL_LENGTH = 2048;
+
 function optionalUrl() {
   return z.preprocess(
     (value) => (value === '' || value === null || value === undefined ? null : value),
-    z.string().url().nullable().optional()
+    z
+      .string()
+      .max(MAX_URL_LENGTH)
+      .url()
+      .refine((value) => /^https?:\/\//i.test(value), 'Solo se permiten URLs http o https')
+      .nullable()
+      .optional()
   );
+}
+
+function optionalText(maxLength: number) {
+  return z.string().max(maxLength).nullable().optional();
 }
 
 function coerceBoolean(defaultValue?: boolean) {
@@ -87,21 +100,21 @@ export const lotDetailSchema = lotSchema.omit({
  * (`id`, `created_at`, `updated_at`, `updated_by`).
  */
 const lotInputBaseSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().trim().min(1).max(120),
   price: optionalNonNegativeNumber(),
   status: lotStatusSchema,
   surface_area: optionalPositiveNumber(),
-  orientation: z.string().nullable().optional(),
+  orientation: optionalText(120),
   image_360_url: optionalUrl(),
   technical_plan_url: optionalUrl(),
-  soil_type: z.string().nullable().optional(),
+  soil_type: optionalText(120),
   has_water_service: coerceBoolean(),
   has_electricity_service: coerceBoolean(),
   has_sewage_service: coerceBoolean(),
   legal_status: legalStatusSchema.nullable().optional(),
-  encumbrances: z.string().nullable().optional(),
-  registry_number: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
+  encumbrances: optionalText(2000),
+  registry_number: optionalText(80),
+  description: optionalText(5000),
 });
 
 /**
@@ -121,7 +134,19 @@ export const lotInsertSchema = lotInputBaseSchema.extend({
  */
 export const lotUpdateSchema = lotInputBaseSchema.partial();
 
+/**
+ * Shape exacto que esperan los formularios de /admin. Es igual al base de
+ * input pero sin defaults, porque React Hook Form controla todos los campos.
+ */
+export const lotFormSchema = lotInputBaseSchema.extend({
+  status: lotStatusSchema,
+  has_water_service: z.boolean(),
+  has_electricity_service: z.boolean(),
+  has_sewage_service: z.boolean(),
+});
+
 export type LotSchema = z.infer<typeof lotSchema>;
 export type LotDetailSchema = z.infer<typeof lotDetailSchema>;
 export type LotInsertSchema = z.infer<typeof lotInsertSchema>;
 export type LotUpdateSchema = z.infer<typeof lotUpdateSchema>;
+export type LotFormSchema = z.infer<typeof lotFormSchema>;

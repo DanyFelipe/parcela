@@ -77,6 +77,14 @@ export function TopBar() {
               <MenuPrimitive.Item className={menuItemClassName} onClick={handleBack}>
                 Volver
               </MenuPrimitive.Item>
+              <MenuPrimitive.Separator className="my-1 h-px bg-panel-border" />
+              <MenuPrimitive.Item
+                data-testid="top-bar-admin-link"
+                className={menuItemClassName}
+                onClick={() => router.push('/admin')}
+              >
+                Iniciar sesión como admin
+              </MenuPrimitive.Item>
             </MenuPrimitive.Popup>
           </MenuPrimitive.Positioner>
         </MenuPrimitive.Portal>
