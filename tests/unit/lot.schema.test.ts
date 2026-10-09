@@ -155,6 +155,35 @@ describe('lotInsertSchema', () => {
   });
 });
 
+describe('lotInsertSchema security constraints', () => {
+  it('accepts http and https asset URLs', () => {
+    const result = lotInsertSchema.parse({
+      name: 'Lote A-02',
+      image_360_url: 'https://cdn.example.com/lot.webp',
+      technical_plan_url: 'http://localhost:3000/plan.webp',
+    });
+
+    expect(result.image_360_url).toBe('https://cdn.example.com/lot.webp');
+  });
+
+  it.each([
+    'javascript:alert(1)',
+    'data:text/html,<script>alert(1)</script>',
+    'ftp://example.com/a',
+  ])('rejects non-http URL %s', (value) => {
+    expect(() => lotInsertSchema.parse({ name: 'Lote A-02', image_360_url: value })).toThrow();
+  });
+
+  it('rejects names longer than 120 characters and trims whitespace', () => {
+    expect(() => lotInsertSchema.parse({ name: 'x'.repeat(121) })).toThrow();
+    expect(lotInsertSchema.parse({ name: '  Lote A-02  ' }).name).toBe('Lote A-02');
+  });
+
+  it('rejects descriptions longer than 5000 characters', () => {
+    expect(() => lotInsertSchema.parse({ name: 'Lote', description: 'x'.repeat(5001) })).toThrow();
+  });
+});
+
 describe('lotUpdateSchema', () => {
   it('accepts a partial update without applying defaults', () => {
     const result = lotUpdateSchema.parse({ price: '95000' });

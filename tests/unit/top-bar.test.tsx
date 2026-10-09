@@ -37,6 +37,15 @@ describe('TopBar', () => {
     expect(screen.getByTestId('top-bar-menu-trigger')).toBeInTheDocument();
   });
 
+  it('navigates to the admin panel from the menu', async () => {
+    render(<TopBar />);
+    fireEvent.click(screen.getByTestId('top-bar-menu-trigger'));
+
+    fireEvent.click(await screen.findByTestId('top-bar-admin-link'));
+
+    expect(navigationMocks.push).toHaveBeenCalledWith('/admin');
+  });
+
   it('requests the front view from the showroom when another view is active', () => {
     useShowroomStore.setState({ currentView: 'top' });
 
