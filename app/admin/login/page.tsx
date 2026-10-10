@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
@@ -43,7 +45,14 @@ export default function AdminLoginPage() {
     'flex h-9 w-full rounded-md border border-border bg-input/30 px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <main className="relative flex min-h-screen items-center justify-center p-6">
+      <Link
+        href="/"
+        className="absolute left-6 top-[calc(env(safe-area-inset-top)+1.5rem)] inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+        Volver al showroom
+      </Link>
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm"

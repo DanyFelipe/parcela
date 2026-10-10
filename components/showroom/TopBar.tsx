@@ -28,6 +28,12 @@ export function TopBar() {
   const isViewer360Open = useShowroomStore((state) => state.isViewer360Open);
   const setViewer360Open = useShowroomStore((state) => state.setViewer360Open);
 
+  // El área /admin usa su propia barra (header del panel): no mostramos el TopBar
+  // flotante del showroom para no duplicar barras.
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   function handleBack(): void {
     if (isViewer360Open) {
       setViewer360Open(false);
