@@ -1,21 +1,18 @@
 import type { MetadataRoute } from 'next';
 
+import { getSiteUrl } from '@/lib/seo/site-url';
 import { getActiveLotIds } from '@/lib/showroom/lot-data';
-
-function getSiteUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL;
-
-  if (!url) {
-    throw new Error(
-      'NEXT_PUBLIC_SITE_URL is not defined. It is required to generate absolute URLs in the sitemap.'
-    );
-  }
-
-  return url;
-}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
+
+  if (!baseUrl) {
+    console.error(
+      'Sitemap skipped: no public site URL configured (NEXT_PUBLIC_SITE_URL or a Vercel URL).'
+    );
+    return [];
+  }
+
   const lotIds = await getActiveLotIds();
 
   const routes: MetadataRoute.Sitemap = [
