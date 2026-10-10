@@ -23,6 +23,12 @@ const supabaseMocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/supabase/server', () => supabaseMocks);
 
+const storageMocks = vi.hoisted(() => ({
+  getStorageProvider: vi.fn(),
+}));
+
+vi.mock('@/lib/storage/provider', () => storageMocks);
+
 import {
   createLot,
   deleteLot,
@@ -30,7 +36,27 @@ import {
   logout,
   updateLot,
   upsertLotHotspot,
+  uploadLotAsset,
 } from '@/app/admin/actions';
+
+const JPEG_HEADER = [0xff, 0xd8, 0xff, 0xe0];
+const TECHNICAL_PLAN_PATH = 'lot-assets/technical-plan/3f2b8c1e-9a4d-4e6f-8b2a-1c2d3e4f5a6b.webp';
+const VIEW_360_PATH = 'lot-assets/view-360/7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d.jpg';
+
+function createStorageProvider() {
+  return {
+    uploadAsset: vi.fn(async (_clientId: string, path: string) => `https://blob.test/${path}`),
+    getAssetUrl: vi.fn(async (_clientId: string, path: string) => `https://blob.test/${path}`),
+    deleteAsset: vi.fn(async () => undefined),
+  };
+}
+
+function buildUploadForm(kind: string, bytes: number[] | Uint8Array, type = 'image/jpeg') {
+  const formData = new FormData();
+  formData.append('kind', kind);
+  formData.append('file', new File([new Uint8Array(bytes)], 'render.jpg', { type }));
+  return formData;
+}
 
 const LOT_ID = '550e8400-e29b-41d4-a716-446655440000';
 const ADMIN_USER = { id: 'user-1', is_anonymous: false };
@@ -99,8 +125,13 @@ const validLot = {
 
 const SESSION_EXPIRED = { success: false, message: 'Tu sesión venció. Iniciá sesión nuevamente.' };
 
+let storageProvider: ReturnType<typeof createStorageProvider>;
+
 beforeEach(() => {
   vi.clearAllMocks();
+  process.env.NEXT_PUBLIC_CLIENT_SLUG = 'test-client';
+  storageProvider = createStorageProvider();
+  storageMocks.getStorageProvider.mockReturnValue(storageProvider);
 });
 
 describe('admin actions', () => {
@@ -141,16 +172,80 @@ describe('admin actions', () => {
       });
     });
 
-    it('rejects non-http image URLs without touching the database', async () => {
+    it('ignores image URLs sent directly, so a client cannot point assets at external hosts', async () => {
+      const client = createMockClient();
+      supabaseMocks.createClient.mockResolvedValue(client);
+
+      await expect(
+        createLot({
+          ...validLot,
+          image_360_url: 'https://evil.example.com/tracker.jpg',
+          technical_plan_url: 'javascript:alert(1)',
+        })
+      ).resolves.toEqual({ success: true });
+
+      expect(client.lotsTable.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ image_360_url: null, technical_plan_url: null })
+      );
+      expect(storageProvider.getAssetUrl).not.toHaveBeenCalled();
+    });
+
+    it('resolves uploaded asset paths to storage URLs before inserting', async () => {
+      const client = createMockClient();
+      supabaseMocks.createClient.mockResolvedValue(client);
+
+      await expect(
+        createLot({
+          ...validLot,
+          technical_plan_path: TECHNICAL_PLAN_PATH,
+          view_360_path: VIEW_360_PATH,
+        })
+      ).resolves.toEqual({ success: true });
+
+      expect(storageProvider.getAssetUrl).toHaveBeenCalledWith('test-client', TECHNICAL_PLAN_PATH);
+      expect(client.lotsTable.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          technical_plan_url: `https://blob.test/${TECHNICAL_PLAN_PATH}`,
+          image_360_url: `https://blob.test/${VIEW_360_PATH}`,
+        })
+      );
+    });
+
+    it('rejects asset paths outside the expected format without touching storage', async () => {
       const client = createMockClient();
       supabaseMocks.createClient.mockResolvedValue(client);
 
       const result = await createLot({
         ...validLot,
-        image_360_url: 'javascript:alert(1)',
+        technical_plan_path: '../../other-client/secret.jpg',
       });
 
       expect(result.success).toBe(false);
+      expect(storageProvider.getAssetUrl).not.toHaveBeenCalled();
+      expect(client.from).not.toHaveBeenCalled();
+    });
+
+    it('rejects a 360 path submitted in the technical plan slot', async () => {
+      const client = createMockClient();
+      supabaseMocks.createClient.mockResolvedValue(client);
+
+      const result = await createLot({ ...validLot, technical_plan_path: VIEW_360_PATH });
+
+      expect(result.success).toBe(false);
+      expect(client.from).not.toHaveBeenCalled();
+    });
+
+    it('asks to re-upload when the referenced asset does not exist', async () => {
+      const client = createMockClient();
+      supabaseMocks.createClient.mockResolvedValue(client);
+      storageProvider.getAssetUrl.mockRejectedValueOnce(new Error('BlobNotFound'));
+
+      await expect(
+        createLot({ ...validLot, technical_plan_path: TECHNICAL_PLAN_PATH })
+      ).resolves.toEqual({
+        success: false,
+        message: 'No se encontró un archivo subido. Volvé a subirlo.',
+      });
       expect(client.from).not.toHaveBeenCalled();
     });
 
@@ -302,6 +397,97 @@ describe('admin actions', () => {
 
       await expect(logout()).rejects.toThrow('redirect');
       expect(client.auth.signOut).toHaveBeenCalled();
+    });
+  });
+
+  describe('uploadLotAsset', () => {
+    it('rejects uploads without an admin session', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient({ user: null }));
+
+      await expect(uploadLotAsset(buildUploadForm('view-360', JPEG_HEADER))).resolves.toEqual(
+        SESSION_EXPIRED
+      );
+      expect(storageProvider.uploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('rejects anonymous Supabase users', async () => {
+      supabaseMocks.createClient.mockResolvedValue(
+        createMockClient({ user: { id: 'anon-1', is_anonymous: true } })
+      );
+
+      await expect(uploadLotAsset(buildUploadForm('view-360', JPEG_HEADER))).resolves.toEqual(
+        SESSION_EXPIRED
+      );
+      expect(storageProvider.uploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('rejects content that is not a supported image, regardless of the declared type', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient());
+      const svgPayload = Array.from(new TextEncoder().encode('<svg onload="alert(1)"></svg>'));
+
+      const result = await uploadLotAsset(
+        buildUploadForm('technical-plan', svgPayload, 'image/jpeg')
+      );
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Solo se permiten imágenes JPG, PNG o WebP.',
+      });
+      expect(storageProvider.uploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('rejects files above 4 MB', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient());
+      const oversized = new Uint8Array(4 * 1024 * 1024 + 1);
+      oversized.set(JPEG_HEADER);
+
+      const result = await uploadLotAsset(buildUploadForm('view-360', oversized));
+
+      expect(result).toEqual({ success: false, message: 'La imagen debe pesar hasta 4 MB.' });
+      expect(storageProvider.uploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unknown asset kind', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient());
+
+      const result = await uploadLotAsset(buildUploadForm('../../etc', JPEG_HEADER));
+
+      expect(result.success).toBe(false);
+      expect(storageProvider.uploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('stores a valid JPEG under a server-generated path that ignores the original file name', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient());
+
+      const result = await uploadLotAsset(buildUploadForm('view-360', JPEG_HEADER));
+
+      expect(result).toMatchObject({ success: true });
+      expect(result.success && result.path).toMatch(
+        /^lot-assets\/view-360\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$/
+      );
+      expect(result.success && result.path).not.toContain('render');
+      expect(storageProvider.uploadAsset).toHaveBeenCalledWith(
+        'test-client',
+        expect.stringMatching(/^lot-assets\/view-360\//),
+        expect.any(Buffer)
+      );
+    });
+
+    it('returns a generic message and reports to Sentry when storage fails', async () => {
+      supabaseMocks.createClient.mockResolvedValue(createMockClient());
+      const storageError = new Error('token=vercel_blob_rw_secret leaked');
+      storageProvider.uploadAsset.mockRejectedValueOnce(storageError);
+
+      const result = await uploadLotAsset(buildUploadForm('technical-plan', JPEG_HEADER));
+
+      expect(result).toEqual({
+        success: false,
+        message: 'No se pudo subir el archivo. Intentá nuevamente.',
+      });
+      expect(JSON.stringify(result)).not.toContain('vercel_blob_rw_secret');
+      expect(sentryMocks.captureException).toHaveBeenCalledWith(storageError, {
+        tags: { area: 'admin', action: 'uploadLotAsset' },
+      });
     });
   });
 });

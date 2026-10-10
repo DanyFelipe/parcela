@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   // Permite acceder al dev server desde la IP de la red local (p. ej. para probar en celulares).
   // Solo aplica a `next dev`; en producción no tiene efecto.
   allowedDevOrigins: ['192.168.20.23'],
+  experimental: {
+    serverActions: {
+      // Vercel limita el cuerpo de cada función a 4.5 MB; con el overhead de multipart
+      // el archivo permitido (4 MB, ver lib/admin/asset-upload.ts) cabe holgado debajo.
+      bodySizeLimit: '4.25mb',
+    },
+  },
   async headers() {
     // El panel /admin no debe quedar en cachés intermedias ni indexarse.
     return [

@@ -77,9 +77,11 @@ export const lotSchema = z.object({
   encumbrances: z.string().nullable(),
   registry_number: z.string().nullable(),
   description: z.string().nullable(),
-  updated_at: z.string().datetime().nullable(),
+  // PostgREST serializa `timestamptz` con offset (ej. "2026-09-28T00:00:00+00:00").
+  // Sin `offset: true`, Zod rechaza esa forma y el panel descartaría todas las filas.
+  updated_at: z.string().datetime({ offset: true }).nullable(),
   updated_by: z.string().uuid().nullable(),
-  created_at: z.string().datetime().nullable(),
+  created_at: z.string().datetime({ offset: true }).nullable(),
 });
 
 /**
@@ -145,8 +147,36 @@ export const lotFormSchema = lotInputBaseSchema.extend({
   has_sewage_service: z.boolean(),
 });
 
+const UUID_V4_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
+
+function assetPathSchema(kind: 'technical-plan' | 'view-360') {
+  return z.string().regex(new RegExp(`^lot-assets/${kind}/${UUID_V4_PATTERN}\\.(jpg|png|webp)$`), {
+    message: 'Ruta de archivo no válida',
+  });
+}
+
+const creationAssetFields = {
+  technical_plan_path: assetPathSchema('technical-plan').nullable().optional(),
+  view_360_path: assetPathSchema('view-360').nullable().optional(),
+};
+
+/**
+ * Creación de lotes. No acepta URLs de imagen: los archivos se suben al storage y
+ * el formulario envía solo la ruta que generó el servidor. El servidor resuelve la
+ * URL pública con `StorageProvider`, así un cliente no puede apuntar a un host externo.
+ */
+export const lotCreateSchema = lotInsertSchema
+  .omit({ image_360_url: true, technical_plan_url: true })
+  .extend(creationAssetFields);
+
+export const lotCreateFormSchema = lotFormSchema
+  .omit({ image_360_url: true, technical_plan_url: true })
+  .extend(creationAssetFields);
+
 export type LotSchema = z.infer<typeof lotSchema>;
 export type LotDetailSchema = z.infer<typeof lotDetailSchema>;
 export type LotInsertSchema = z.infer<typeof lotInsertSchema>;
 export type LotUpdateSchema = z.infer<typeof lotUpdateSchema>;
 export type LotFormSchema = z.infer<typeof lotFormSchema>;
+export type LotCreateInput = z.infer<typeof lotCreateSchema>;
+export type LotCreateFormSchema = z.infer<typeof lotCreateFormSchema>;

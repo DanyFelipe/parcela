@@ -5,8 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { ASSET_KINDS, MAX_ASSET_BYTES } from '@/lib/admin/asset-constraints';
+import { buildAssetPath, detectImageExtension, getClientSlug } from '@/lib/admin/asset-upload';
+import { getStorageProvider } from '@/lib/storage/provider';
 import { createClient } from '@/lib/supabase/server';
-import { lotIdSchema, lotInsertSchema, lotUpdateSchema } from '@/lib/validations/lot.schema';
+import { lotCreateSchema, lotIdSchema, lotUpdateSchema } from '@/lib/validations/lot.schema';
 
 type ActionResult = { success: true } | { success: false; message: string };
 
@@ -88,16 +91,87 @@ async function runAdminAction(
   }
 }
 
+const MISSING_ASSET_MESSAGE = 'No se encontró un archivo subido. Volvé a subirlo.';
+const UPLOAD_TOO_LARGE_MESSAGE = 'La imagen debe pesar hasta 4 MB.';
+const UNSUPPORTED_FILE_MESSAGE = 'Solo se permiten imágenes JPG, PNG o WebP.';
+const UPLOAD_FAILED_MESSAGE = 'No se pudo subir el archivo. Intentá nuevamente.';
+
+const assetKindSchema = z.enum(ASSET_KINDS);
+
+/**
+ * Resuelve la URL pública de un asset a partir de la ruta que generó el servidor.
+ * Devuelve `null` si el asset no existe; los errores inesperados se reportan a Sentry.
+ */
+async function resolveAssetUrl(assetPath: string): Promise<string | null> {
+  try {
+    return await getStorageProvider().getAssetUrl(getClientSlug(), assetPath);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { area: 'admin', action: 'resolveAssetUrl' } });
+    return null;
+  }
+}
+
+export async function uploadLotAsset(
+  formData: FormData
+): Promise<{ success: true; path: string } | { success: false; message: string }> {
+  try {
+    if (!(await requireAdminContext())) {
+      return { success: false, message: SESSION_EXPIRED_MESSAGE };
+    }
+
+    const kind = assetKindSchema.safeParse(formData.get('kind'));
+    if (!kind.success) {
+      return { success: false, message: INVALID_DATA_MESSAGE };
+    }
+
+    const file = formData.get('file');
+    if (!(file instanceof File) || file.size === 0) {
+      return { success: false, message: UNSUPPORTED_FILE_MESSAGE };
+    }
+
+    if (file.size > MAX_ASSET_BYTES) {
+      return { success: false, message: UPLOAD_TOO_LARGE_MESSAGE };
+    }
+
+    const content = new Uint8Array(await file.arrayBuffer());
+    const extension = detectImageExtension(content);
+
+    if (!extension) {
+      return { success: false, message: UNSUPPORTED_FILE_MESSAGE };
+    }
+
+    const path = buildAssetPath(kind.data, extension);
+    await getStorageProvider().uploadAsset(getClientSlug(), path, Buffer.from(content));
+
+    return { success: true, path };
+  } catch (error) {
+    Sentry.captureException(error, { tags: { area: 'admin', action: 'uploadLotAsset' } });
+    return { success: false, message: UPLOAD_FAILED_MESSAGE };
+  }
+}
+
 export async function createLot(input: unknown): Promise<ActionResult> {
   return runAdminAction(
     'createLot',
     'No se pudo crear el lote. Intentá nuevamente.',
     async ({ supabase, userId }) => {
-      const parsed = lotInsertSchema.safeParse(input);
+      const parsed = lotCreateSchema.safeParse(input);
       if (!parsed.success) return INVALID_DATA_MESSAGE;
 
+      const { technical_plan_path, view_360_path, ...fields } = parsed.data;
+
+      const technicalPlanUrl = technical_plan_path
+        ? await resolveAssetUrl(technical_plan_path)
+        : null;
+      if (technical_plan_path && !technicalPlanUrl) return MISSING_ASSET_MESSAGE;
+
+      const view360Url = view_360_path ? await resolveAssetUrl(view_360_path) : null;
+      if (view_360_path && !view360Url) return MISSING_ASSET_MESSAGE;
+
       const { error } = await supabase.from('lots').insert({
-        ...parsed.data,
+        ...fields,
+        technical_plan_url: technicalPlanUrl,
+        image_360_url: view360Url,
         updated_by: userId,
       });
       if (error) throw error;
