@@ -74,10 +74,12 @@ describe('getActiveLotIds', () => {
 describe('sitemap', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    delete process.env.VERCEL_URL;
     process.env.NEXT_PUBLIC_SITE_URL = 'https://parcela.test';
   });
 
-  it('includes the home page and all active lot pages', async () => {
+  function mockActiveLots() {
     supabaseMocks.createClient.mockResolvedValue(
       createSupabaseClient([
         { id: 'lot-1', status: 'available' },
@@ -85,6 +87,10 @@ describe('sitemap', () => {
         { id: 'lot-3', status: 'sold' },
       ])
     );
+  }
+
+  it('includes the home page and all active lot pages', async () => {
+    mockActiveLots();
 
     const result = await sitemap();
 
@@ -106,11 +112,45 @@ describe('sitemap', () => {
     });
   });
 
-  it('throws when NEXT_PUBLIC_SITE_URL is not defined', async () => {
+  it('normalizes a trailing slash in NEXT_PUBLIC_SITE_URL', async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://parcela.test/';
+    mockActiveLots();
+
+    const result = await sitemap();
+
+    expect(result[1].url).toBe('https://parcela.test/lot/lot-1');
+  });
+
+  it('falls back to the Vercel production URL when NEXT_PUBLIC_SITE_URL is missing', async () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = 'parcela.vercel.app';
+    mockActiveLots();
 
-    supabaseMocks.createClient.mockResolvedValue(createSupabaseClient([]));
+    const result = await sitemap();
 
-    await expect(sitemap()).rejects.toThrow('NEXT_PUBLIC_SITE_URL is not defined');
+    expect(result[1].url).toBe('https://parcela.vercel.app/lot/lot-1');
+  });
+
+  it('falls back to the deployment URL when no production URL is available', async () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    process.env.VERCEL_URL = 'parcela-preview-123.vercel.app';
+    mockActiveLots();
+
+    const result = await sitemap();
+
+    expect(result[1].url).toBe('https://parcela-preview-123.vercel.app/lot/lot-1');
+  });
+
+  it('returns an empty sitemap instead of failing the build when no URL is configured', async () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const result = await sitemap();
+
+    expect(result).toEqual([]);
+    expect(supabaseMocks.createClient).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalledOnce();
+
+    consoleError.mockRestore();
   });
 });
