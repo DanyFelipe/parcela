@@ -7,23 +7,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 
 import { Button, buttonVariants } from '@/components/ui/button';
+import { LotAssetField } from '@/components/admin/LotAssetField';
 import {
+  lotCreateFormSchema,
+  lotCreateSchema,
   lotFormSchema,
-  lotInsertSchema,
   lotUpdateSchema,
+  type LotCreateFormSchema,
+  type LotCreateInput,
   type LotFormSchema,
-  type LotInsertSchema,
   type LotUpdateSchema,
 } from '@/lib/validations/lot.schema';
 
-const defaultCreateValues: LotFormSchema = {
+type FormValues = LotFormSchema & Partial<LotCreateFormSchema>;
+
+const defaultCreateValues: LotCreateFormSchema = {
   name: '',
   price: null,
   status: 'available',
   surface_area: null,
   orientation: null,
-  image_360_url: null,
-  technical_plan_url: null,
   soil_type: null,
   has_water_service: false,
   has_electricity_service: false,
@@ -32,10 +35,12 @@ const defaultCreateValues: LotFormSchema = {
   encumbrances: null,
   registry_number: null,
   description: null,
+  technical_plan_path: null,
+  view_360_path: null,
 };
 
 type ActionResult = { success: true } | { success: false; message: string };
-type CreateSubmit = (data: LotInsertSchema) => Promise<ActionResult>;
+type CreateSubmit = (data: LotCreateInput) => Promise<ActionResult>;
 type EditSubmit = (lotId: string, data: LotUpdateSchema) => Promise<ActionResult>;
 
 type LotFormProps =
@@ -65,7 +70,7 @@ function Field({
   );
 }
 
-function normalizeEmptyStrings(data: LotFormSchema): LotFormSchema {
+function normalizeEmptyStrings<T extends LotFormSchema>(data: T): T {
   return {
     ...data,
     orientation: data.orientation?.trim() || null,
@@ -81,17 +86,24 @@ export function LotForm(props: LotFormProps) {
   const router = useRouter();
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState(0);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LotFormSchema>({
-    resolver: zodResolver(lotFormSchema) as unknown as Resolver<LotFormSchema>,
+  } = useForm<FormValues>({
+    resolver: zodResolver(
+      mode === 'create' ? lotCreateFormSchema : lotFormSchema
+    ) as unknown as Resolver<FormValues>,
     defaultValues: mode === 'edit' ? props.defaultValues : defaultCreateValues,
   });
 
-  async function onSubmit(data: LotFormSchema) {
+  function handleUploadPendingChange(pending: boolean): void {
+    setPendingUploads((count) => Math.max(0, count + (pending ? 1 : -1)));
+  }
+
+  async function onSubmit(data: FormValues) {
     setActionError(null);
     setIsSubmitting(true);
 
@@ -99,7 +111,7 @@ export function LotForm(props: LotFormProps) {
       const normalized = normalizeEmptyStrings(data);
 
       if (mode === 'create') {
-        const result = await (submit as CreateSubmit)(lotInsertSchema.parse(normalized));
+        const result = await (submit as CreateSubmit)(lotCreateSchema.parse(normalized));
         if (!result.success) {
           setActionError(result.message);
           setIsSubmitting(false);
@@ -241,25 +253,59 @@ export function LotForm(props: LotFormProps) {
           )}
         />
 
-        <Controller
-          name="image_360_url"
-          control={control}
-          render={({ field }) => (
-            <Field label="URL vista 360°" error={errors.image_360_url?.message}>
-              <input {...field} value={field.value ?? ''} className={inputClass} />
-            </Field>
-          )}
-        />
+        {mode === 'create' ? (
+          <>
+            <Controller
+              name="view_360_path"
+              control={control}
+              render={({ field }) => (
+                <LotAssetField
+                  label="Vista 360°"
+                  kind="view-360"
+                  error={errors.view_360_path?.message}
+                  onChange={field.onChange}
+                  onPendingChange={handleUploadPendingChange}
+                />
+              )}
+            />
 
-        <Controller
-          name="technical_plan_url"
-          control={control}
-          render={({ field }) => (
-            <Field label="URL plano técnico" error={errors.technical_plan_url?.message}>
-              <input {...field} value={field.value ?? ''} className={inputClass} />
-            </Field>
-          )}
-        />
+            <Controller
+              name="technical_plan_path"
+              control={control}
+              render={({ field }) => (
+                <LotAssetField
+                  label="Plano técnico"
+                  kind="technical-plan"
+                  error={errors.technical_plan_path?.message}
+                  onChange={field.onChange}
+                  onPendingChange={handleUploadPendingChange}
+                />
+              )}
+            />
+          </>
+        ) : (
+          <>
+            <Controller
+              name="image_360_url"
+              control={control}
+              render={({ field }) => (
+                <Field label="URL vista 360°" error={errors.image_360_url?.message}>
+                  <input {...field} value={field.value ?? ''} className={inputClass} />
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="technical_plan_url"
+              control={control}
+              render={({ field }) => (
+                <Field label="URL plano técnico" error={errors.technical_plan_url?.message}>
+                  <input {...field} value={field.value ?? ''} className={inputClass} />
+                </Field>
+              )}
+            />
+          </>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -345,8 +391,14 @@ export function LotForm(props: LotFormProps) {
         <Link href="/admin" className={buttonVariants({ variant: 'outline' })}>
           Cancelar
         </Link>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear lote' : 'Guardar cambios'}
+        <Button type="submit" disabled={isSubmitting || pendingUploads > 0}>
+          {isSubmitting
+            ? 'Guardando...'
+            : pendingUploads > 0
+              ? 'Esperá a que termine la subida'
+              : mode === 'create'
+                ? 'Crear lote'
+                : 'Guardar cambios'}
         </Button>
       </div>
     </form>

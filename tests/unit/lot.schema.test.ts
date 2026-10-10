@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   legalStatusSchema,
+  lotCreateSchema,
   lotDetailSchema,
   lotInsertSchema,
   lotSchema,
@@ -57,6 +58,16 @@ describe('lotSchema', () => {
 
   it('validates a complete lot row from Supabase', () => {
     expect(lotSchema.parse(baseLot)).toEqual(baseLot);
+  });
+
+  it('accepts PostgREST timestamptz values with an offset and microseconds', () => {
+    const row = {
+      ...baseLot,
+      created_at: '2026-09-28T00:00:00.123456+00:00',
+      updated_at: '2026-09-28T12:34:56+00:00',
+    };
+
+    expect(lotSchema.parse(row)).toEqual(row);
   });
 
   it('rejects a negative price', () => {
@@ -152,6 +163,37 @@ describe('lotInsertSchema', () => {
 
     expect(result.has_water_service).toBe(true);
     expect(result.has_electricity_service).toBe(false);
+  });
+});
+
+describe('lotCreateSchema', () => {
+  const PLAN_PATH = 'lot-assets/technical-plan/3f2b8c1e-9a4d-4e6f-8b2a-1c2d3e4f5a6b.webp';
+
+  it('accepts server-generated asset paths', () => {
+    const result = lotCreateSchema.parse({ name: 'Lote A-03', technical_plan_path: PLAN_PATH });
+
+    expect(result.technical_plan_path).toBe(PLAN_PATH);
+  });
+
+  it('drops image URLs, so creation cannot bypass the upload flow', () => {
+    const result = lotCreateSchema.parse({
+      name: 'Lote A-03',
+      image_360_url: 'https://evil.example.com/a.jpg',
+      technical_plan_url: 'https://evil.example.com/b.jpg',
+    });
+
+    expect(result).not.toHaveProperty('image_360_url');
+    expect(result).not.toHaveProperty('technical_plan_url');
+  });
+
+  it.each([
+    'https://evil.example.com/plan.jpg',
+    '../secret.jpg',
+    'lot-assets/technical-plan/not-a-uuid.jpg',
+    'lot-assets/technical-plan/3f2b8c1e-9a4d-4e6f-8b2a-1c2d3e4f5a6b.svg',
+    'lot-assets/view-360/3f2b8c1e-9a4d-4e6f-8b2a-1c2d3e4f5a6b.webp',
+  ])('rejects invalid asset path %s', (path) => {
+    expect(() => lotCreateSchema.parse({ name: 'Lote A-03', technical_plan_path: path })).toThrow();
   });
 });
 

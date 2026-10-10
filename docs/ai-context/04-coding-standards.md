@@ -70,17 +70,31 @@ chore: actualizar dependencias de dev
 
 ```typescript
 // Ejemplo de manejo de error esperado en una Server Action
+import * as Sentry from '@sentry/nextjs';
+import { createClient } from '@/lib/supabase/server';
+
 export async function updateLot(lotId: string, changes: unknown) {
-  try {
-    const parsed = lotUpdateSchema.parse(changes);
-    const supabase = createServerClient();
-    const { error } = await supabase.from('lots').update(parsed).eq('id', lotId);
-    if (error) throw error;
-  } catch (err) {
-    // Log a Sentry con contexto, pero devolver mensaje seguro a la UI
-    console.error('Error updating lot', { lotId, err });
-    throw new Error('No se pudo actualizar el lote. Intenta nuevamente.');
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.is_anonymous) {
+    return { success: false, message: 'Tu sesión venció. Iniciá sesión nuevamente.' };
   }
+
+  const parsed = lotUpdateSchema.safeParse(changes);
+  if (!parsed.success) {
+    return { success: false, message: 'Revisá los datos ingresados e intentá nuevamente.' };
+  }
+
+  const { error } = await supabase.from('lots').update(parsed.data).eq('id', lotId);
+  if (error) {
+    // El error real va a Sentry; a la UI llega solo el mensaje seguro.
+    Sentry.captureException(error, { tags: { area: 'admin', action: 'updateLot' } });
+    return { success: false, message: 'No se pudo actualizar el lote. Intenta nuevamente.' };
+  }
+
+  return { success: true };
 }
 ```
 
@@ -187,16 +201,24 @@ const videoUrl = getTransitionVideoUrl('rear', 'front'); // fila independiente e
 transitionPlayer.play(videoUrl);
 ```
 
-**Construir un CRUD en `/admin` sin que se haya pedido en esta fase del proyecto:**
+**Validar la sesión del admin con `getSession()` o confiar solo en la cookie:**
 
 ```typescript
-// ❌ MAL — un agente "adelanta trabajo" agregando un formulario de views/transitions
-// sin que el usuario lo haya pedido, en una fase donde la carga es manual por SQL (ver sección 0 de 02-architecture.md)
+// ❌ MAL — getSession lee la cookie sin validarla contra Supabase Auth, y no filtra anónimos
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+if (!session) throw new Error('Not authorized');
 
-// ✅ BIEN — si la tarea no lo pide explícitamente, no se construye. Se deja el esquema/validaciones
-// listos (Zod, RLS) para que ese CRUD se pueda construir después sin fricción, pero no se anticipa la UI.
+// ✅ BIEN — getUser valida contra el servidor de Auth y rechaza usuarios anónimos
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+if (!user || user.is_anonymous) {
+  return { success: false, message: 'Tu sesión venció. Iniciá sesión nuevamente.' };
+}
 ```
 
 ---
 
-**Última actualización:** 2026-09-23 · **Versión:** 1.8
+**Última actualización:** 2026-10-09 · **Versión:** 1.9

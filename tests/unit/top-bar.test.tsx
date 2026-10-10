@@ -37,6 +37,14 @@ describe('TopBar', () => {
     expect(screen.getByTestId('top-bar-menu-trigger')).toBeInTheDocument();
   });
 
+  it('renders nothing on admin routes so the panel owns its own top bar', () => {
+    navigationMocks.pathname = '/admin/lots/new';
+
+    const { container } = render(<TopBar />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('navigates to the admin panel from the menu', async () => {
     render(<TopBar />);
     fireEvent.click(screen.getByTestId('top-bar-menu-trigger'));

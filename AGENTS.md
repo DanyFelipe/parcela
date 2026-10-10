@@ -53,8 +53,17 @@ pnpm exec tsc --noEmit                    # no hay script de typecheck dedicado
 - Para cualquier tarea de diseño visual (UI, colores, tipografía, animación) se usan **solo 2 fuentes**: `shadcn/ui` estándar + la skill `frontend-design`. No existe un design system propio en el repo — ver `docs/ai-context/00-INDEX.md`.
 - Auth existe solo para `/admin`; el visitante del showroom nunca inicia sesión ni tiene cuenta. El `matcher` del middleware no se amplía fuera de `/admin/:path*`.
 - Sin lógica condicional por cliente (`if (cliente === 'x')`) en la plantilla — las diferencias entre clientes viven en datos y env vars.
-- Fase actual: carga de datos manual por SQL, sin CRUD en `/admin` todavía — no lo construyas sin que se pida explícitamente (ver `02-architecture.md`, sección 0). Definir el schema Zod y las políticas RLS sí corresponde desde ya.
+- El panel `/admin` ya tiene CRUD de lotes (con subida segura de planos y vistas 360°) y editor de hotspots. Toda mutación nueva sigue el contrato de `02-architecture.md`, sección 4: Server Action, sesión verificada contra Supabase Auth, validación Zod y errores sin detalles internos. Todo archivo se sube vía `StorageProvider`.
 - Ante cualquier ambigüedad, pregunta antes de asumir.
+
+## Skills disponibles
+
+Skills instaladas en `.agents/skills/` que se cargan según la tarea:
+
+- `frontend-design` — dirección de diseño visual; se usa junto con `shadcn/ui` en toda tarea de UI (ver reglas no negociables).
+- `security-audit` — metodología de seguridad; en modo guía para revisar un feature, en modo completo solo si se pide auditar.
+- `vercel-react-best-practices` — reglas de rendimiento de React/Next.js.
+- `find-skills` — descubrir e instalar skills nuevas.
 
 ## Dónde está todo
 

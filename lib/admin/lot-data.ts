@@ -20,10 +20,12 @@ export async function getLotsForAdmin(): Promise<LotSchema[]> {
     const parsed = lotSchema.safeParse(row);
 
     if (!parsed.success) {
+      const issues = parsed.error.issues.map((issue) => issue.path.join('.'));
+      console.error('Admin lot list row failed validation', { issues });
       Sentry.captureMessage('Admin lot list row failed validation', {
         level: 'warning',
         tags: { area: 'admin', action: 'getLotsForAdmin' },
-        extra: { issues: parsed.error.issues.map((issue) => issue.path.join('.')) },
+        extra: { issues },
       });
       return [];
     }

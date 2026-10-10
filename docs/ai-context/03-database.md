@@ -135,22 +135,10 @@ create index idx_feature_hotspots_view_id on feature_hotspots(view_id);
 
 ## 2. Políticas de Row Level Security (referencia)
 
-```sql
-alter table lots enable row level security;
+**`docs/schema.sql` es la única fuente de verdad de las políticas** — no copiarlas aquí ni en el código, consultarlas ahí. Resumen del modelo actual:
 
--- Public read (showroom visible sin login)
-create policy "Public read access to lots"
-  on lots for select
-  using (true);
-
--- Solo usuarios autenticados pueden modificar
-create policy "Authenticated sales users can update"
-  on lots for update
-  using (auth.role() = 'authenticated');
-
--- Insertar/eliminar lotes: mismo criterio, evaluar si se requiere un rol más restrictivo
--- (ej. tabla de roles) si en el futuro hay múltiples niveles de permiso.
-```
+- **Lectura pública** (`select`) en las tablas del showroom: `using (true)` — el visitante no inicia sesión.
+- **Escritura solo autenticada**: `auth.role() = 'authenticated'` **y** `coalesce((select auth.jwt() ->> 'is_anonymous'), 'false') <> 'true'`. La condición sobre `is_anonymous` la agrega `docs/migrations/002_admin_write_hardening.sql`: los usuarios anónimos de Supabase Auth tienen rol `authenticated`, así que sin ese filtro podrían escribir.
 
 **Regla:** si un cliente requiere múltiples niveles de permiso (ej. "vendedor" solo edita precio/estado, "admin" también sube renders nuevos), esto se modela con una tabla de roles adicional y políticas específicas por operación — no se resuelve en el código de la aplicación como única barrera.
 
@@ -184,4 +172,4 @@ create policy "Authenticated sales users can update"
 
 ---
 
-**Última actualización:** 2026-09-16 · **Versión:** 1.7
+**Última actualización:** 2026-10-09 · **Versión:** 1.8

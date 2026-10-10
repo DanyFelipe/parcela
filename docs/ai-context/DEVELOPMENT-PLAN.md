@@ -122,7 +122,7 @@ Objetivo: la pieza opcional de inmersión (360°) y afinar detalles de UX ya ide
 | PARC-401 | Integración de Photo Sphere Viewer (`Viewer360.tsx`)                              | 🟡        | 5          | Done   |
 | PARC-402 | Botón "Ver en 360°" condicional a `image_360_url` no nulo                         | 🟡        | 1          | Done   |
 | PARC-403 | Estado de carga del visor 360° (puede pesar más que un frame normal)              | 🟢        | 2          | Done   |
-| PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          |        |
+| PARC-404 | Precarga de clips de transición (`preload="auto"`) al entrar a una vista (04, §6) | 🟡        | 3          | Done   |
 | PARC-405 | Respeto de `prefers-reduced-motion` (salta directo a imagen fija)                 | 🟢        | 2          | Done   |
 | PARC-406 | Accesibilidad: `aria-label`, navegación por teclado en hotspots y controles       | 🟡        | 3          |        |
 
@@ -167,18 +167,18 @@ Objetivo: dejar el proyecto listo para mostrarse a un cliente real (piloto) en p
 
 ---
 
-## Backlog (fuera de sprint — no iniciar sin discusión explícita)
+## Backlog (no iniciar sin discusión explícita)
 
-Estos ítems están **intencionalmente pospuestos**. No deben iniciarse por iniciativa propia (de un desarrollador o un agente de IA) sin que el usuario lo solicite explícitamente — ver `02-architecture.md`, sección 0.
+Estos ítems están **intencionalmente pospuestos**. No deben iniciarse por iniciativa propia (de un desarrollador o un agente de IA) sin que el usuario lo solicite explícitamente.
 
-| Ticket   | Título                                             | Por qué está en backlog                                                   |
-| -------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
-| PARC-B01 | CRUD autenticado en `/admin` para `lots`           | Fase actual: carga manual por SQL (decisión de producto ya tomada)        |
-| PARC-B02 | Herramienta "click para fijar hotspot" en `/admin` | Mencionada como mejora futura, sin definir aún                            |
-| PARC-B03 | Agrupación de hotspots por manzana/sector          | Solo si se detecta saturación real en un cliente con muchos lotes         |
-| PARC-B04 | Migración de storage a Cloudflare R2               | Solo si el costo de egress de Vercel Blob se vuelve significativo         |
-| PARC-B05 | Selector de tema claro/oscuro                      | Decisión de producto ya tomada: tema fijo único claro (ver `00-INDEX.md`) |
-| PARC-B06 | Internacionalización (i18n) multi-idioma           | No solicitado; evaluar si un cliente lo requiere                          |
+| Ticket   | Título                                    | Por qué está en backlog                                                   |
+| -------- | ----------------------------------------- | ------------------------------------------------------------------------- |
+| PARC-B03 | Agrupación de hotspots por manzana/sector | Solo si se detecta saturación real en un cliente con muchos lotes         |
+| PARC-B04 | Migración de storage a Cloudflare R2      | Solo si el costo de egress de Vercel Blob se vuelve significativo         |
+| PARC-B05 | Selector de tema claro/oscuro             | Decisión de producto ya tomada: tema fijo único claro (ver `00-INDEX.md`) |
+| PARC-B06 | Internacionalización (i18n) multi-idioma  | No solicitado; evaluar si un cliente lo requiere                          |
+
+> **PARC-B01 y PARC-B02 fueron entregados fuera de sprint** (CRUD de lotes con subida segura de planos y vistas 360°, y editor de hotspots — rama `feat/PARC-B01-B02-admin-crud-hotspots`). Su contrato está en `02-architecture.md`, sección 0.
 
 ---
 
@@ -196,4 +196,4 @@ Esto asegura que el agente cargue el contexto correcto (vía `AGENTS.md` → `00
 
 ---
 
-**Última actualización:** 2026-10-07 · **Versión:** 2.6
+**Última actualización:** 2026-10-09 · **Versión:** 2.7
