@@ -11,18 +11,20 @@
 
 ---
 
-## 0. Fase actual del proyecto (leer antes de proponer o construir cualquier pantalla de `/admin`)
+## 0. Estado actual del panel `/admin` (leer antes de tocar cualquier pantalla de `/admin`)
 
-**En esta fase, toda la carga de datos (`lots`, `views`, `view_transitions`, `lot_hotspots`) se hace manualmente vía SQL directo en Supabase — no existe todavía un CRUD en `/admin`.** Un agente de IA no debe construir formularios, tablas editables, ni Server Actions de escritura en `/admin` a menos que se le pida explícitamente — hacerlo ahora sería trabajo prematuro sobre una interfaz que aún no se ha validado que se necesite en esa forma.
+**El panel ya existe y está en uso:** CRUD de lotes (crear, editar, eliminar), subida segura de planos técnicos y vistas 360° vía `StorageProvider`, y editor de hotspots de la vista `top` (PARC-B01/B02). Ver el estado de tickets en `DEVELOPMENT-PLAN.md`.
 
-**Lo que SÍ debe hacerse ahora para que el CRUD futuro se acople sin fricción (esto es lo que hace que la arquitectura ya esté "lista" para ese momento):**
+**Contrato que toda mutación de `/admin` cumple (no negociable):**
 
-- Los esquemas de validación Zod (`lib/validations/lot.schema.ts`) se definen desde ya, con la forma real de los datos — aunque hoy nadie los use desde un formulario, son la base de la validación que el futuro CRUD reutilizará sin cambios.
-- Las políticas RLS (`03-database.md`) se mantienen correctas y probadas desde ya — el día que exista un formulario de escritura, la seguridad ya está resuelta a nivel de base de datos, no depende de que el formulario "se acuerde" de validar permisos.
-- El patrón de Server Actions (`02-architecture.md`, sección 3) se usa desde ya para _cualquier_ mutación que sí se implemente (por ejemplo, si en algún punto intermedio se agrega solo la edición de `status`/`price` de un lote antes que el resto del CRUD) — nunca se escribe una mutación directa desde un componente cliente "porque total es temporal".
-- La estructura de carpetas ya reserva el espacio (`app/admin/`, `components/admin/LotForm.tsx`, `components/admin/LotTable.tsx`) — construirlos es agregar código dentro de un espacio ya definido, no rediseñar nada.
+- **Server Action** en `app/admin/actions.ts` (`'use server'`). Nunca una escritura desde un componente cliente, aunque RLS lo permitiera.
+- **Sesión verificada contra Supabase Auth** (`auth.getUser()`), no con `getSession()`, que lee la cookie sin validarla. Los usuarios anónimos (`is_anonymous`) se rechazan aunque tengan rol `authenticated`.
+- **Validación Zod** de cada entrada (`lib/validations/lot.schema.ts`) antes de tocar la base. Los IDs se validan como UUID.
+- **Errores sin detalles internos:** el usuario recibe un mensaje genérico en español; el error real va a Sentry (`captureException`), nunca al cliente ni a `console.error` como único reporte.
+- **Resultado tipado** (`{ success: true } | { success: false; message }`), no excepciones que el cliente deba adivinar.
+- **RLS como última barrera**: las políticas de escritura excluyen usuarios anónimos (`docs/migrations/002_admin_write_hardening.sql`).
 
-**Regla para el agente de IA:** si una tarea pide "agregar un campo nuevo" o "cambiar una regla de negocio", el cambio se refleja en el esquema SQL y en el schema de Zod correspondiente, **aunque hoy no haya ningún formulario que lo use** — así, cuando se construya el CRUD, ya encuentra todo listo.
+**Regla para el agente de IA:** si una tarea pide "agregar un campo nuevo" o "cambiar una regla de negocio", el cambio se refleja en el esquema SQL (con migración versionada) y en el schema de Zod correspondiente, y se propaga a las Server Actions y al formulario en el mismo cambio.
 
 ## 1. Estructura de carpetas
 
@@ -31,14 +33,18 @@
   /page.tsx                      → Showroom público, vista general del terreno
   /lot/[id]/page.tsx             → Página completa e indexable del lote (ficha ampliada, ver sección 8.2)
   /admin
-    /page.tsx                    → Panel CRUD de lotes (protegido)
-    /login/page.tsx              → Login del usuario de ventas
-    /actions.ts                  → Server Actions (mutaciones a Supabase)
+    /login/page.tsx              → Login del usuario de ventas (fuera del layout protegido)
+    /actions.ts                  → Server Actions: mutaciones a Supabase y subida de archivos
+    /(protected)/layout.tsx      → Guard de sesión + header del panel (única barra en /admin)
+    /(protected)/page.tsx        → Listado de lotes
+    /(protected)/lots/new        → Alta de lote
+    /(protected)/lots/[id]/edit  → Edición de lote
+    /(protected)/lots/[id]/hotspots → Editor de hotspots (vista top)
   /layout.tsx                    → Layout raíz (fuentes, providers globales)
 
 /components
   /showroom
-    /TopBar.tsx                  → Barra persistente (volver + menú) en toda la app; también sobre el visor 360°
+    /TopBar.tsx                  → Barra persistente (volver + menú) en el showroom y la ficha de lote; también sobre el visor 360°. No se renderiza en /admin
     /TransitionVideoPlayer.tsx   → Reproductor de video para transiciones entre vistas (ver sección 6)
     /Hotspot.tsx                 → Punto interactivo de un lote (exclusivo de la vista top, ver sección 7.1)
     /HotspotPreviewCard.tsx      → Modal rápido con datos básicos al hacer click en un hotspot de lote
@@ -47,8 +53,10 @@
     /ViewControls.tsx            → Botón de rotación front↔rear + control dedicado para top (ver sección 7.4)
     /Viewer360.tsx               → Wrapper de Photo Sphere Viewer (sin cabecera propia; lo cierra la TopBar)
   /admin
-    /LotForm.tsx                 → Formulario de edición (RHF + Zod) — ver sección 0, no construir aún
-    /LotTable.tsx                → Listado de lotes — ver sección 0, no construir aún
+    /LotForm.tsx                 → Formulario de alta y edición (RHF + Zod)
+    /LotAssetField.tsx           → Campo de subida de plano técnico y vista 360° (Server Action)
+    /HotspotEditor.tsx           → Editor de hotspots sobre la vista top
+    /StatusBadge.tsx, /DeleteLotButton.tsx, /LogoutButton.tsx → Piezas del panel
   /ui                             → Componentes shadcn/ui (no editar manualmente los generados)
 
 /lib
@@ -56,7 +64,11 @@
     /types.ts                    → Interfaz StorageProvider (contrato obligatorio)
     /provider.ts                 → Factory según STORAGE_PROVIDER
     /vercel-blob.provider.ts
-    /cloudflare-r2.provider.ts
+    /cloudflare-r2.provider.ts   → PLANIFICADO (PARC-B04). Hoy STORAGE_PROVIDER=cloudflare-r2 lanza error
+  /admin                         → Lógica de /admin fuera de los componentes
+    /asset-constraints.ts        → Tamaño máximo y tipos de asset (seguro para cliente)
+    /asset-upload.ts             → Detección por firma binaria y rutas generadas (solo servidor)
+    /lot-data.ts, /view-data.ts  → Lecturas del panel
   /transitions
     /types.ts                    → Interfaz TransitionPlayer (contrato obligatorio, ver sección 6)
     /video-transition-player.ts  → Implementación con <video> nativo (default actual)
@@ -73,7 +85,7 @@
   /ai-context/                    → Este set de documentos
 
 /scripts
-  /migrate-storage.ts              → Migración entre proveedores de storage
+  /migrate-storage.ts              → PLANIFICADO (PARC-B04). Migración entre proveedores de storage
   /seed-client.sql                 → Script base para onboarding de cliente nuevo
 
 /tests
@@ -107,9 +119,13 @@ Convención de nombres uniforme entre proveedores, organizada por tipo de asset:
 {clientId}/transitions/rear-to-front.mp4
 {clientId}/transitions/front-to-top.mp4
 {clientId}/transitions/top-to-front.mp4
-{clientId}/lots/{lotId}/360.jpg
-{clientId}/lots/{lotId}/technical-plan.webp
+{clientId}/lot-assets/technical-plan/{uuid}.{jpg|png|webp}
+{clientId}/lot-assets/view-360/{uuid}.{jpg|png|webp}
 ```
+
+**Rutas reales de los assets subidos desde `/admin`:** el servidor genera el nombre con un UUID aleatorio (nunca el nombre original del archivo) y detecta el formato por su firma binaria, no por la extensión. Así no hay path traversal, colisiones ni se revela el ID del lote antes de crearlo. Al crear un lote, el formulario envía solo la ruta; el servidor valida su formato y resuelve la URL con `getAssetUrl`. Ver `lib/admin/asset-upload.ts` y `lib/validations/lot.schema.ts` (`lotCreateSchema`).
+
+**Límite de plataforma:** Vercel limita el cuerpo de cada petición a función a 4.5 MB. El panel acepta archivos de hasta 4 MB (`lib/admin/asset-constraints.ts`). Las vistas 360° sin comprimir pueden superar ese límite; resolverlo requiere compresión previa o un cambio de arquitectura. No resolverlo subiendo directo desde el navegador sin aprobación, porque esquivaría `StorageProvider`.
 
 ## 3. Autenticación: exclusiva de `/admin`, nunca para visitantes del showroom
 
@@ -163,6 +179,8 @@ export const config = {
 };
 ```
 
+**Nota:** Next.js 16 depreca la convención `middleware.ts` en favor de `proxy.ts` (el build lo advierte). El proyecto todavía usa `middleware.ts`; la migración es un cambio de código pendiente, no algo que un agente deba hacer "de pasada" al tocar la autenticación.
+
 **Regla:** el `matcher` del middleware se limita explícitamente a `/admin/:path*` — nunca se amplía para cubrir rutas del showroom público (`/`, `/lot/[id]`), ya que esas deben permanecer accesibles sin sesión bajo cualquier circunstancia.
 
 ### 3.2. Flujo de login
@@ -175,8 +193,13 @@ import { createClient } from '@/lib/supabase/client';
 async function handleLogin(email: string, password: string) {
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  // redirigir a /admin tras éxito
+  if (error) {
+    setError('No se pudo iniciar sesión. Revisá el correo y la contraseña.');
+    return;
+  }
+  // replace + refresh para que el servidor revalide la sesión al entrar en /admin
+  router.replace('/admin');
+  router.refresh();
 }
 ```
 
@@ -198,24 +221,38 @@ Toda escritura a Supabase desde el panel `/admin` pasa por una Server Action, nu
 // app/admin/actions.ts
 'use server';
 
-import { createServerClient } from '@/lib/supabase/server';
-import { lotUpdateSchema } from '@/lib/validations/lot.schema';
+import * as Sentry from '@sentry/nextjs';
+import { createClient } from '@/lib/supabase/server';
+import { lotIdSchema, lotUpdateSchema } from '@/lib/validations/lot.schema';
 
-export async function updateLot(lotId: string, changes: unknown) {
-  // 1. Validar sesión
-  const supabase = createServerClient();
+export async function updateLot(lotId: string, input: unknown) {
+  // 1. Validar sesión contra Supabase Auth (getUser), no getSession que solo lee la cookie
+  const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authorized');
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.is_anonymous) {
+    return { success: false, message: 'Tu sesión venció. Iniciá sesión nuevamente.' };
+  }
 
-  // 2. Validar forma de los datos con Zod (nunca confiar en el tipo de TS únicamente)
-  const parsed = lotUpdateSchema.parse(changes);
+  // 2. Validar IDs y payload con Zod (nunca confiar en el tipo de TS únicamente)
+  const parsedId = lotIdSchema.safeParse(lotId);
+  const parsed = lotUpdateSchema.safeParse(input);
+  if (!parsedId.success || !parsed.success) {
+    return { success: false, message: 'Revisá los datos ingresados e intentá nuevamente.' };
+  }
 
   // 3. Ejecutar mutación — RLS sigue siendo la última línea de defensa
-  const { data, error } = await supabase.from('lots').update(parsed).eq('id', lotId);
-  if (error) throw error;
-  return data;
+  const { error } = await supabase
+    .from('lots')
+    .update({ ...parsed.data, updated_by: user.id, updated_at: new Date().toISOString() })
+    .eq('id', parsedId.data);
+  if (error) {
+    Sentry.captureException(error, { tags: { area: 'admin', action: 'updateLot' } });
+    return { success: false, message: 'No se pudo actualizar el lote. Intentá nuevamente.' };
+  }
+
+  return { success: true };
 }
 ```
 
@@ -414,25 +451,15 @@ La plantilla no impone una resolución única en píxeles, pero sí exige que to
 
 > **Consecuencia práctica:** si un render se reemplaza por una versión de mayor resolución pero mismo encuadre, los hotspots no requieren recalibración.
 
-**Workflow futuro en `/admin` (no construir ahora, solo diseñar para que encaje)**
+**Editor de hotspots en `/admin` (implementado — PARC-B02)**
 
-Cuando en una fase posterior se construya el CRUD de hotspots, la interfaz deberá:
+El editor vive en `components/admin/HotspotEditor.tsx` y `app/admin/(protected)/lots/[id]/hotspots`. Comportamiento:
 
-1. Mostrar el render de `top` a su tamaño natural o escalado proporcionalmente dentro del editor (nunca estirado).
-2. Permitir hacer click sobre el render; el sistema convierte la posición del click a porcentaje usando la fórmula:
-   ```
-   hotspot_x = round((click_x / render_width) * 100)
-   hotspot_y = round((click_y / render_height) * 100)
-   ```
-3. Previsualizar el hotspot inmediatamente sobre la imagen mientras se edita.
-4. Validar que `hotspot_x` y `hotspot_y` estén entre `0` y `100` antes de guardar.
-5. Garantizar unicidad por `(lot_id, view_id)` para evitar que un mismo lote tenga dos marcadores en la misma vista.
-
-**Reglas de implementación para el admin futuro:**
-
-- No almacenar píxeles ni referencias a la resolución del render en la base de datos; la fuente de verdad son los porcentajes.
-- Si el render se muestra escalado en el editor, el cálculo debe usar las dimensiones reales del elemento imagen en pantalla, no las dimensiones del contenedor padre.
-- La variante `alt_image_url` de `top` debe tener el mismo encuadre y aspect ratio que `base_image_url`; por eso los hotspots no se ven afectados por el toggle de grid (sección 7.5).
+1. Muestra el render de `top` (`views.base_image_url`) escalado proporcionalmente, nunca estirado.
+2. Al hacer click, convierte la posición a porcentaje usando las dimensiones reales del elemento imagen en pantalla: `x = ((clientX - rect.left) / rect.width) * 100` (y análogo para `y`), con clamp a `0..100`.
+3. Previsualiza el marcador inmediatamente; guarda con `upsertLotHotspot`, que hace `upsert` con `onConflict: 'lot_id,view_id'` (garantiza unicidad por lote y vista).
+4. Las coordenadas se guardan como porcentajes; nunca se almacenan píxeles ni la resolución del render.
+5. La variante `alt_image_url` de `top` comparte encuadre y aspect ratio con `base_image_url`; por eso los hotspots no se ven afectados por el toggle de grid (sección 7.5).
 
 ### 7.4. Controles de navegación entre vistas (sin reversa, sin scrubbing)
 
@@ -569,4 +596,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-10-04 · **Versión:** 3.7
+**Última actualización:** 2026-10-09 · **Versión:** 3.8
