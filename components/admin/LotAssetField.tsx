@@ -94,7 +94,7 @@ export function LotAssetField({
         accept={ACCEPT_ATTRIBUTE}
         disabled={isUploading}
         onChange={handleFileChange}
-        className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium disabled:opacity-50"
+        className="block w-full text-base file:mr-3 file:min-h-11 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:text-sm file:font-medium disabled:opacity-50 sm:text-sm sm:file:min-h-0"
       />
       <p className="text-xs text-muted-foreground" aria-live="polite">
         {isUploading && 'Subiendo archivo...'}

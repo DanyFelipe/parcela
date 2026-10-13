@@ -23,7 +23,13 @@ export function LogoutButton() {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button variant="outline" size="sm" disabled={isPending} onClick={handleClick}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="min-h-11 sm:min-h-0"
+        disabled={isPending}
+        onClick={handleClick}
+      >
         {isPending ? 'Saliendo...' : 'Salir'}
       </Button>
       {error && <span className="text-xs text-destructive">{error}</span>}

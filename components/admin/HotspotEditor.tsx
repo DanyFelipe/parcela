@@ -99,13 +99,13 @@ export function HotspotEditor({ lotId, view, existingHotspot }: HotspotEditorPro
         </div>
       )}
 
-      <div className="relative inline-block max-w-full overflow-hidden rounded-xl border border-border">
+      <div className="relative inline-block w-full max-w-full overflow-hidden rounded-xl border border-border">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={view.base_image_url}
           alt="Vista top"
           onClick={handleImageClick}
-          className="block max-h-[70vh] cursor-crosshair object-contain"
+          className="block h-auto max-h-[70svh] w-full max-w-full cursor-crosshair object-contain"
         />
         {marker && (
           <span
@@ -116,11 +116,16 @@ export function HotspotEditor({ lotId, view, existingHotspot }: HotspotEditorPro
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={handleSave} disabled={!marker || isSaving}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <Button className="min-h-11 sm:min-h-0" onClick={handleSave} disabled={!marker || isSaving}>
           {isSaving ? 'Guardando...' : 'Guardar hotspot'}
         </Button>
-        <Button variant="outline" onClick={handleDelete} disabled={!marker || isDeleting}>
+        <Button
+          variant="outline"
+          className="min-h-11 sm:min-h-0"
+          onClick={handleDelete}
+          disabled={!marker || isDeleting}
+        >
           {isDeleting ? 'Eliminando...' : 'Eliminar hotspot'}
         </Button>
         {saved && <span className="text-sm text-status-available">Guardado correctamente</span>}

@@ -279,6 +279,44 @@ export async function deleteLotHotspot(lotId: string, viewId: string): Promise<A
   );
 }
 
+export interface LoginState {
+  message: string | null;
+}
+
+const loginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+});
+
+const INVALID_CREDENTIALS_MESSAGE = 'No se pudo iniciar sesión. Revisá el correo y la contraseña.';
+
+/**
+ * Login del panel. Se resuelve en el servidor (no con el cliente de Supabase en el
+ * navegador) para que la cookie de sesión se escriba en la respuesta del propio
+ * request y el `redirect` a `/admin` no dependa de una carrera entre el cliente y
+ * la navegación del App Router (causa del bug: la sesión se creaba pero la vista
+ * quedaba colgada en "Entrando...").
+ */
+export async function login(_previousState: LoginState, formData: FormData): Promise<LoginState> {
+  const parsed = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  if (!parsed.success) {
+    return { message: 'Ingresá un correo y una contraseña válidos.' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+
+  if (error) {
+    return { message: INVALID_CREDENTIALS_MESSAGE };
+  }
+
+  redirect('/admin');
+}
+
 export async function logout(): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signOut();

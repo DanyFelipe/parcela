@@ -47,8 +47,10 @@ type LotFormProps =
   | { mode: 'create'; lotId?: never; submit: CreateSubmit; defaultValues?: LotFormSchema }
   | { mode: 'edit'; lotId: string; submit: EditSubmit; defaultValues: LotFormSchema };
 
+// En mobile: 44px de alto y 16px de fuente (evita el zoom automático de iOS).
+// En sm+ vuelve a la densidad compacta de escritorio.
 const inputClass =
-  'flex h-9 w-full rounded-md border border-border bg-input/30 px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
+  'flex h-11 w-full rounded-md border border-border bg-input/30 px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:text-sm';
 
 const selectClass = `${inputClass} appearance-none`;
 
@@ -315,7 +317,7 @@ export function LotForm(props: LotFormProps) {
             name="has_water_service"
             control={control}
             render={({ field }) => (
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={field.value}
@@ -330,7 +332,7 @@ export function LotForm(props: LotFormProps) {
             name="has_electricity_service"
             control={control}
             render={({ field }) => (
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={field.value}
@@ -345,7 +347,7 @@ export function LotForm(props: LotFormProps) {
             name="has_sewage_service"
             control={control}
             render={({ field }) => (
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={field.value}
@@ -387,11 +389,21 @@ export function LotForm(props: LotFormProps) {
         )}
       />
 
-      <div className="flex items-center justify-end gap-3">
-        <Link href="/admin" className={buttonVariants({ variant: 'outline' })}>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <Link
+          href="/admin"
+          className={buttonVariants({
+            variant: 'outline',
+            className: 'w-full justify-center sm:w-auto',
+          })}
+        >
           Cancelar
         </Link>
-        <Button type="submit" disabled={isSubmitting || pendingUploads > 0}>
+        <Button
+          type="submit"
+          className="w-full sm:w-auto"
+          disabled={isSubmitting || pendingUploads > 0}
+        >
           {isSubmitting
             ? 'Guardando...'
             : pendingUploads > 0
