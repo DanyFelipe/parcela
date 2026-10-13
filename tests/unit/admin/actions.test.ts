@@ -33,6 +33,7 @@ import {
   createLot,
   deleteLot,
   deleteLotHotspot,
+  login,
   logout,
   updateLot,
   upsertLotHotspot,
@@ -66,10 +67,17 @@ interface MockClientOptions {
   lotError?: Error | null;
   hotspotError?: Error | null;
   signOutError?: Error | null;
+  signInError?: Error | null;
 }
 
 function createMockClient(options: MockClientOptions = {}) {
-  const { user = ADMIN_USER, lotError = null, hotspotError = null, signOutError = null } = options;
+  const {
+    user = ADMIN_USER,
+    lotError = null,
+    hotspotError = null,
+    signOutError = null,
+    signInError = null,
+  } = options;
 
   const lotsTable = {
     insert: vi.fn(() => Promise.resolve({ error: lotError })),
@@ -94,6 +102,7 @@ function createMockClient(options: MockClientOptions = {}) {
     auth: {
       getUser: vi.fn(() => Promise.resolve({ data: { user }, error: null })),
       signOut: vi.fn(() => Promise.resolve({ error: signOutError })),
+      signInWithPassword: vi.fn(() => Promise.resolve({ error: signInError })),
     },
     from: vi.fn((table: string) => {
       if (table === 'lots') return lotsTable;
@@ -488,6 +497,50 @@ describe('admin actions', () => {
       expect(sentryMocks.captureException).toHaveBeenCalledWith(storageError, {
         tags: { area: 'admin', action: 'uploadLotAsset' },
       });
+    });
+  });
+});
+
+describe('login', () => {
+  function buildLoginForm(email: string, password: string) {
+    const formData = new FormData();
+    formData.set('email', email);
+    formData.set('password', password);
+    return formData;
+  }
+
+  it('rejects invalid input without calling Supabase', async () => {
+    const client = createMockClient();
+    supabaseMocks.createClient.mockResolvedValue(client);
+
+    await expect(login({ message: null }, buildLoginForm('not-an-email', ''))).resolves.toEqual({
+      message: 'Ingresá un correo y una contraseña válidos.',
+    });
+    expect(client.auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('returns a generic message when credentials are rejected', async () => {
+    const client = createMockClient({ signInError: new Error('Invalid login credentials') });
+    supabaseMocks.createClient.mockResolvedValue(client);
+
+    await expect(
+      login({ message: null }, buildLoginForm('admin@example.com', 'wrong'))
+    ).resolves.toEqual({
+      message: 'No se pudo iniciar sesión. Revisá el correo y la contraseña.',
+    });
+  });
+
+  it('signs in on the server and redirects to the panel', async () => {
+    const client = createMockClient();
+    supabaseMocks.createClient.mockResolvedValue(client);
+
+    await expect(
+      login({ message: null }, buildLoginForm(' admin@example.com ', 'secret'))
+    ).rejects.toThrow('redirect');
+
+    expect(client.auth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'admin@example.com',
+      password: 'secret',
     });
   });
 });

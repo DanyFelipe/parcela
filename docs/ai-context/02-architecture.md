@@ -186,22 +186,24 @@ export const config = {
 ### 3.2. Flujo de login
 
 ```typescript
-// app/admin/login/page.tsx
-'use client';
-import { createClient } from '@/lib/supabase/client';
+// app/admin/actions.ts
+'use server';
+export async function login(_previousState: LoginState, formData: FormData): Promise<LoginState> {
+  const parsed = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+  if (!parsed.success) return { message: 'Ingresá un correo y una contraseña válidos.' };
 
-async function handleLogin(email: string, password: string) {
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    setError('No se pudo iniciar sesión. Revisá el correo y la contraseña.');
-    return;
-  }
-  // replace + refresh para que el servidor revalide la sesión al entrar en /admin
-  router.replace('/admin');
-  router.refresh();
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) return { message: 'No se pudo iniciar sesión. Revisá el correo y la contraseña.' };
+
+  redirect('/admin');
 }
 ```
+
+La página usa `useActionState(login, ...)` con `<form action={formAction}>`: React maneja el estado pendiente y el mensaje de error, y el `redirect` del servidor navega al panel. **El login se hace en el servidor, no con el cliente de Supabase en el navegador** — así la cookie se escribe en la respuesta del propio request y la navegación no depende de una carrera entre el cliente y el App Router.
 
 ```
 Visitante entra a /admin
@@ -596,4 +598,4 @@ Este proyecto **no usa un enfoque responsive tradicional para el contenido visua
 
 ---
 
-**Última actualización:** 2026-10-09 · **Versión:** 3.8
+**Última actualización:** 2026-10-13 · **Versión:** 3.9
